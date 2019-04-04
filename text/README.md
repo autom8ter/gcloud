@@ -1,47 +1,9 @@
-# lang
+# text
 --
-    import "github.com/autom8ter/gcloud/lang"
+    import "github.com/autom8ter/gcloud/text"
 
 
 ## Usage
-
-#### type Lang
-
-```go
-type Lang struct {
-}
-```
-
-
-#### func  New
-
-```go
-func New(ctx context.Context, opts ...option.ClientOption) (*Lang, error)
-```
-
-#### func (*Lang) Close
-
-```go
-func (l *Lang) Close()
-```
-
-#### func (*Lang) Speech
-
-```go
-func (l *Lang) Speech() *Speech
-```
-
-#### func (*Lang) Text2Speech
-
-```go
-func (l *Lang) Text2Speech() *Text2Speech
-```
-
-#### func (*Lang) Translator
-
-```go
-func (l *Lang) Translator() *Translator
-```
 
 #### type RecognizeOption
 
@@ -80,6 +42,44 @@ func (s *Speech) Close()
 
 ```go
 func (s *Speech) Recognize(ctx context.Context, opts ...RecognizeOption) (*speechpb.RecognizeResponse, error)
+```
+
+#### type Text
+
+```go
+type Text struct {
+}
+```
+
+
+#### func  New
+
+```go
+func New(ctx context.Context, opts ...option.ClientOption) (*Text, error)
+```
+
+#### func (*Text) Close
+
+```go
+func (l *Text) Close()
+```
+
+#### func (*Text) Speech
+
+```go
+func (l *Text) Speech() *Speech
+```
+
+#### func (*Text) Text2Speech
+
+```go
+func (l *Text) Text2Speech() *Text2Speech
+```
+
+#### func (*Text) Translator
+
+```go
+func (l *Text) Translator() *Translator
 ```
 
 #### type Text2Speech

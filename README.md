@@ -50,13 +50,6 @@ func (g *GCP) JSON(obj interface{}) []byte
 ```
 JSON formats an object and turns it into JSON bytes
 
-#### func (*GCP) Lang
-
-```go
-func (g *GCP) Lang() *lang.Lang
-```
-Lang returns a client used for GCP text2speech, translation, and speech services
-
 #### func (*GCP) Proto
 
 ```go
@@ -79,10 +72,18 @@ func (g *GCP) Render(text string, data interface{}, w io.Writer) error
 Render uses html/template along with the sprig funcmap functions to render a
 strings to an io writer ref: https://github.com/Masterminds/sprig
 
-#### func (*GCP) Vision
+#### func (*GCP) Text
 
 ```go
-func (g *GCP) Vision() *vision.Vision
+func (g *GCP) Text() *text.Text
+```
+Text returns a client used for common text operations: GCP text2speech,
+translation, and speech services
+
+#### func (*GCP) Video
+
+```go
+func (g *GCP) Video() *video.Video
 ```
 PubSub returns a client used for GCP video intelligence and computer vision
 
