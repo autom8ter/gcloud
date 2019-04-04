@@ -5,6 +5,13 @@
 
 ## Usage
 
+#### func  DefaultClient
+
+```go
+func DefaultClient(ctx context.Context, scopes []string) (*http.Client, error)
+```
+DefaultClient returns an authenticated http client with the specified scopes
+
 #### type GCP
 
 ```go
@@ -21,12 +28,40 @@ func New(ctx context.Context, opts ...option.ClientOption) (*GCP, error)
 ```
 New returns a new authenticated GCP instance from the provided api options
 
+#### func (*GCP) Auth
+
+```go
+func (g *GCP) Auth() *auth.Auth
+```
+Auth returns a client used for GCP key management and IAM
+
+#### func (*GCP) Blob
+
+```go
+func (g *GCP) Blob() *blob.Blob
+```
+Blob returns a client used for GCP blob storage
+
 #### func (*GCP) Close
 
 ```go
 func (g *GCP) Close()
 ```
 Close closes all clients
+
+#### func (*GCP) DefaultClient
+
+```go
+func (g *GCP) DefaultClient(ctx context.Context, scopes []string) (*http.Client, error)
+```
+DefaultClient returns an authenticated http client with the specified scopes
+
+#### func (*GCP) Docs
+
+```go
+func (g *GCP) Docs() *documents.Documents
+```
+Docs returns a client used for GCP firestore (JSON documents)
 
 #### func (*GCP) Execute
 
@@ -64,6 +99,13 @@ func (g *GCP) Render(text string, data interface{}, w io.Writer) error
 Render uses html/template along with the sprig funcmap functions to render a
 strings to an io writer ref: https://github.com/Masterminds/sprig
 
+#### func (*GCP) SQL
+
+```go
+func (g *GCP) SQL() *sql.SQL
+```
+SQL returns a client used for GCP cloud sql
+
 #### func (*GCP) Text
 
 ```go
@@ -77,7 +119,7 @@ translation, and speech services
 ```go
 func (g *GCP) Video() *video.Video
 ```
-PubSub returns a client used for GCP video intelligence and computer vision
+Video returns a client used for GCP video intelligence and computer vision
 
 #### func (*GCP) XML
 
