@@ -106,7 +106,7 @@ func (g *GCP) Robots() *robots.Robot {
 	return g.bots
 }
 
-// Blob returns a client used for GCP blob storage
+// Storage returns a client used for GCP blob storage, firestore (documents), and cloud sql spanner
 func (g *GCP) Storage() *storage.Storage {
 	return g.strg
 }
@@ -116,6 +116,10 @@ func (g *GCP) Close() {
 	g.txt.Close()
 	g.sub.Close()
 	g.vid.Close()
+	g.bots.Close()
+	g.ath.Close()
+	g.strg.Close()
+	g.trc.Flush()
 }
 
 // JSON formats an object and turns it into JSON bytes

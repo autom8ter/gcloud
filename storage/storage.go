@@ -26,6 +26,11 @@ func New(ctx context.Context, opts ...option.ClientOption) (*Storage, error) {
 	return s, err
 }
 
+func (s *Storage) Close() {
+	s.docs.Close()
+	s.blob.Close()
+}
+
 func (s *Storage) Document() *Document {
 	return s.docs
 }
