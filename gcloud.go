@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/autom8ter/gcloud/lang"
 	"github.com/autom8ter/gcloud/pubsub"
+	"github.com/autom8ter/gcloud/vision"
 	"github.com/golang/protobuf/proto"
 	"github.com/pkg/errors"
 	"google.golang.org/api/option"
@@ -17,21 +18,27 @@ type Func func(g *GCP) error
 type GCP struct {
 	lng *lang.Lang
 	sub *pubsub.PubSub
+	vis *vision.Vision
 }
 
+// New returns a new authenticated GCP instance from the provided api options
 func New(ctx context.Context, opts ...option.ClientOption) (*GCP, error) {
-	l, err := lang.New(ctx, opts...)
+	g := &GCP{}
+	var err error
+	var newErr error
+	g.lng, newErr = lang.New(ctx, opts...)
 	if err != nil {
-		return nil, err
+		err = errors.Wrap(err, newErr.Error())
 	}
-	sub, err := pubsub.New(ctx, opts...)
+	g.sub, err = pubsub.New(ctx, opts...)
 	if err != nil {
-		return nil, err
+		err = errors.Wrap(err, newErr.Error())
 	}
-	return &GCP{
-		lng: l,
-		sub: sub,
-	}, nil
+	g.vis, err = vision.New(ctx, opts...)
+	if err != nil {
+		err = errors.Wrap(err, newErr.Error())
+	}
+	return g, nil
 }
 
 // Lang returns a client used for GCP text2speech, translation, and speech services
@@ -42,6 +49,11 @@ func (g *GCP) Lang() *lang.Lang {
 // PubSub returns a client used for GCP pubsub
 func (g *GCP) PubSub() *pubsub.PubSub {
 	return g.sub
+}
+
+// PubSub returns a client used for GCP video intelligence and computer vision
+func (g *GCP) Vision() *vision.Vision {
+	return g.vis
 }
 
 // Close closes all clients

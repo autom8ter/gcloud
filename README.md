@@ -27,6 +27,7 @@ GCP holds Google Cloud Platform Clients and carries some utility functions
 ```go
 func New(ctx context.Context, opts ...option.ClientOption) (*GCP, error)
 ```
+New returns a new authenticated GCP instance from the provided api options
 
 #### func (*GCP) Close
 
@@ -77,6 +78,13 @@ func (g *GCP) Render(text string, data interface{}, w io.Writer) error
 ```
 Render uses html/template along with the sprig funcmap functions to render a
 strings to an io writer ref: https://github.com/Masterminds/sprig
+
+#### func (*GCP) Vision
+
+```go
+func (g *GCP) Vision() *vision.Vision
+```
+PubSub returns a client used for GCP video intelligence and computer vision
 
 #### func (*GCP) XML
 
