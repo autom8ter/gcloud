@@ -12,6 +12,16 @@ import (
 )
 
 // HandlerFunc is used to run a function using a GCP object (see GCP.Execute)
+// Creating a HandlerFunc is easy...
+/*
+	func NewHandlerFunc() HandlerFunc {
+		return func(g *GCP) error {
+
+		this is similar to http.HandlerFunc...
+
+		return nil
+	}}
+ */
 type HandlerFunc func(g *GCP) error
 
 // GCP holds Google Cloud Platform Clients and carries some utility functions

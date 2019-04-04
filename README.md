@@ -5,14 +5,6 @@
 
 ## Usage
 
-#### type Func
-
-```go
-type Func func(g *GCP) error
-```
-
-Func is used to run a function using a GCP object (see GCP.Execute)
-
 #### type GCP
 
 ```go
@@ -39,7 +31,7 @@ Close closes all clients
 #### func (*GCP) Execute
 
 ```go
-func (g *GCP) Execute(fns ...Func) error
+func (g *GCP) Execute(fns ...HandlerFunc) error
 ```
 Execute runs all functions and returns a wrapped error
 
@@ -100,3 +92,20 @@ XML formats an object and turns it into XML bytes
 func (g *GCP) YAML(obj interface{}) []byte
 ```
 YAML formats an object and turns it into YAML bytes
+
+#### type HandlerFunc
+
+```go
+type HandlerFunc func(g *GCP) error
+```
+
+HandlerFunc is used to run a function using a GCP object (see GCP.Execute)
+Creating a HandlerFunc is easy...
+
+    func NewHandlerFunc() HandlerFunc {
+    	return func(g *GCP) error {
+
+    	this is similar to http.HandlerFunc...
+
+    	return nil
+    }}
