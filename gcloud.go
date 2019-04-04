@@ -3,10 +3,9 @@ package gcloud
 import (
 	"context"
 	"github.com/autom8ter/gcloud/auth"
-	"github.com/autom8ter/gcloud/blob"
-	"github.com/autom8ter/gcloud/documents"
 	"github.com/autom8ter/gcloud/pubsub"
 	"github.com/autom8ter/gcloud/robots"
+	"github.com/autom8ter/gcloud/storage"
 	"github.com/autom8ter/gcloud/text"
 	"github.com/autom8ter/gcloud/trace"
 	"github.com/autom8ter/gcloud/video"
@@ -32,13 +31,12 @@ type HandlerFunc func(g *GCP) error
 
 // GCP holds Google Cloud Platform Clients and carries some utility functions
 type GCP struct {
-	txt *text.Text
-	sub *pubsub.PubSub
-	vid *video.Video
-	ath *auth.Auth
-	doc *documents.Documents
-	blb *blob.Blob
-	trc *trace.Trace
+	txt  *text.Text
+	sub  *pubsub.PubSub
+	vid  *video.Video
+	ath  *auth.Auth
+	strg *storage.Storage
+	trc  *trace.Trace
 	bots *robots.Robot
 }
 
@@ -51,23 +49,19 @@ func New(ctx context.Context, opts ...option.ClientOption) (*GCP, error) {
 	if err != nil {
 		err = errors.Wrap(err, newErr.Error())
 	}
-	g.sub, err = pubsub.New(ctx, opts...)
+	g.sub, newErr = pubsub.New(ctx, opts...)
 	if err != nil {
 		err = errors.Wrap(err, newErr.Error())
 	}
-	g.vid, err = video.New(ctx, opts...)
+	g.vid, newErr = video.New(ctx, opts...)
 	if err != nil {
 		err = errors.Wrap(err, newErr.Error())
 	}
-	g.ath, err = auth.New(ctx, opts...)
+	g.ath, newErr = auth.New(ctx, opts...)
 	if err != nil {
 		err = errors.Wrap(err, newErr.Error())
 	}
-	g.blb, err = blob.New(ctx, opts...)
-	if err != nil {
-		err = errors.Wrap(err, newErr.Error())
-	}
-	g.doc, err = documents.New(ctx, opts...)
+	g.strg, newErr = storage.New(ctx, opts...)
 	if err != nil {
 		err = errors.Wrap(err, newErr.Error())
 	}
@@ -107,20 +101,14 @@ func (g *GCP) Auth() *auth.Auth {
 	return g.ath
 }
 
-
 // Auth returns a client used for GCP key management and IAM
 func (g *GCP) Robots() *robots.Robot {
 	return g.bots
 }
 
 // Blob returns a client used for GCP blob storage
-func (g *GCP) Blob() *blob.Blob {
-	return g.blb
-}
-
-// Docs returns a client used for GCP firestore (JSON documents)
-func (g *GCP) Docs() *documents.Documents {
-	return g.doc
+func (g *GCP) Storage() *storage.Storage {
+	return g.strg
 }
 
 // Close closes all clients

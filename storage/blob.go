@@ -1,4 +1,4 @@
-package blob
+package storage
 
 import (
 	"cloud.google.com/go/storage"
@@ -12,7 +12,7 @@ type Blob struct {
 	strg *storage.Client
 }
 
-func New(ctx context.Context, opts ...option.ClientOption) (*Blob, error) {
+func NewBlob(ctx context.Context, opts ...option.ClientOption) (*Blob, error) {
 	client, err := storage.NewClient(ctx)
 	if err != nil {
 		return nil, err
@@ -114,8 +114,5 @@ func (b *Blob) SignedURL(bucket, object string, opts ...SignedUrlFunc) (string, 
 	for _, o := range opts {
 		o(r)
 	}
-	url, err := storage.SignedURL(bucket, object, r)
-	if err != nil {
-		return url, err
-	}
+	return storage.SignedURL(bucket, object, r)
 }

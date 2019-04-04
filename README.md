@@ -71,13 +71,6 @@ func (g *GCP) Auth() *auth.Auth
 ```
 Auth returns a client used for GCP key management and IAM
 
-#### func (*GCP) Blob
-
-```go
-func (g *GCP) Blob() *blob.Blob
-```
-Blob returns a client used for GCP blob storage
-
 #### func (*GCP) Close
 
 ```go
@@ -91,13 +84,6 @@ Close closes all clients
 func (g *GCP) DefaultClient(ctx context.Context, scopes []string) (*http.Client, error)
 ```
 DefaultClient returns an authenticated http client with the specified scopes
-
-#### func (*GCP) Docs
-
-```go
-func (g *GCP) Docs() *documents.Documents
-```
-Docs returns a client used for GCP firestore (JSON documents)
 
 #### func (*GCP) Execute
 
@@ -141,6 +127,13 @@ strings to an io writer ref: https://github.com/Masterminds/sprig
 func (g *GCP) Robots() *robots.Robot
 ```
 Auth returns a client used for GCP key management and IAM
+
+#### func (*GCP) Storage
+
+```go
+func (g *GCP) Storage() *storage.Storage
+```
+Blob returns a client used for GCP blob storage
 
 #### func (*GCP) Text
 

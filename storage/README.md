@@ -1,6 +1,6 @@
-# blob
+# storage
 --
-    import "github.com/autom8ter/gcloud/blob"
+    import "github.com/autom8ter/gcloud/storage"
 
 
 ## Usage
@@ -13,10 +13,10 @@ type Blob struct {
 ```
 
 
-#### func  New
+#### func  NewBlob
 
 ```go
-func New(ctx context.Context, opts ...option.ClientOption) (*Blob, error)
+func NewBlob(ctx context.Context, opts ...option.ClientOption) (*Blob, error)
 ```
 
 #### func (*Blob) AddBucketACL
@@ -85,8 +85,61 @@ func (b *Blob) UpdateBucket(ctx context.Context, name string, attributes storage
 func (b *Blob) UploadObject(ctx context.Context, r io.Reader, projectID, bucket, name string, public bool) (*storage.ObjectHandle, *storage.ObjectAttrs, error)
 ```
 
+#### type Document
+
+```go
+type Document struct {
+}
+```
+
+
+#### func  NewDocument
+
+```go
+func NewDocument(ctx context.Context, opts ...option.ClientOption) (*Document, error)
+```
+
+#### func (*Document) Client
+
+```go
+func (v *Document) Client() *firestore.Client
+```
+
+#### func (*Document) Close
+
+```go
+func (v *Document) Close()
+```
+
 #### type SignedUrlFunc
 
 ```go
 type SignedUrlFunc func(options *storage.SignedURLOptions)
+```
+
+
+#### type Storage
+
+```go
+type Storage struct {
+}
+```
+
+
+#### func  New
+
+```go
+func New(ctx context.Context, opts ...option.ClientOption) (*Storage, error)
+```
+
+#### func (*Storage) Blob
+
+```go
+func (s *Storage) Blob() *Blob
+```
+
+#### func (*Storage) Document
+
+```go
+func (s *Storage) Document() *Document
 ```

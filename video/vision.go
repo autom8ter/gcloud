@@ -9,7 +9,7 @@ import (
 
 type Vision struct {
 	annotator *vision.ImageAnnotatorClient
-	prod *vision.ProductSearchClient
+	prod      *vision.ProductSearchClient
 }
 
 func NewVision(ctx context.Context, opts ...option.ClientOption) (*Vision, error) {
@@ -20,7 +20,7 @@ func NewVision(ctx context.Context, opts ...option.ClientOption) (*Vision, error
 	if err != nil {
 		err = errors.Wrap(err, newErr.Error())
 	}
-	v.prod, newErr = vision.NewProductSearchClient(ctx, opts ...)
+	v.prod, newErr = vision.NewProductSearchClient(ctx, opts...)
 	if err != nil {
 		err = errors.Wrap(err, newErr.Error())
 
