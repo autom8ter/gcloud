@@ -22,13 +22,62 @@ func NewIntelligence(ctx context.Context, opts ...option.ClientOption) (*Intelli
 #### func (*Intelligence) Client
 
 ```go
-func (v *Intelligence) Client()
+func (v *Intelligence) Client() *video.Client
 ```
 
 #### func (*Intelligence) Close
 
 ```go
 func (v *Intelligence) Close()
+```
+
+#### func (*Intelligence) DetectAll
+
+```go
+func (i *Intelligence) DetectAll(ctx context.Context, r io.Reader, w io.Writer) (*videopb.AnnotateVideoResponse, error)
+```
+
+#### func (*Intelligence) DetectExplicitContent
+
+```go
+func (i *Intelligence) DetectExplicitContent(ctx context.Context, r io.Reader, w io.Writer) (*videopb.AnnotateVideoResponse, error)
+```
+
+#### func (*Intelligence) DetectFaces
+
+```go
+func (i *Intelligence) DetectFaces(ctx context.Context, r io.Reader, w io.Writer) (*videopb.AnnotateVideoResponse, error)
+```
+
+#### func (*Intelligence) DetectLabel
+
+```go
+func (i *Intelligence) DetectLabel(ctx context.Context, r io.Reader, w io.Writer) (*videopb.AnnotateVideoResponse, error)
+```
+
+#### func (*Intelligence) DetectText
+
+```go
+func (i *Intelligence) DetectText(ctx context.Context, r io.Reader, w io.Writer) (*videopb.AnnotateVideoResponse, error)
+```
+
+#### func (*Intelligence) TrackObjects
+
+```go
+func (i *Intelligence) TrackObjects(ctx context.Context, r io.Reader, w io.Writer) (*videopb.AnnotateVideoResponse, error)
+```
+objectTracking analyzes a video and extracts entities with their bounding boxes.
+
+#### func (*Intelligence) TrackObjectsFromStorage
+
+```go
+func (i *Intelligence) TrackObjectsFromStorage(ctx context.Context, gcsURI string, w io.Writer) (*videopb.AnnotateVideoResponse, error)
+```
+
+#### func (*Intelligence) TranscribeSpeech
+
+```go
+func (i *Intelligence) TranscribeSpeech(ctx context.Context, r io.Reader, w io.Writer) (*videopb.AnnotateVideoResponse, error)
 ```
 
 #### type Video
