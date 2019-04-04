@@ -1,14 +1,22 @@
 package gcloud
 
 import (
+	"context"
 	"encoding/json"
 	"encoding/xml"
 	"github.com/Masterminds/sprig"
 	"github.com/golang/protobuf/proto"
+	"golang.org/x/oauth2/google"
 	"gopkg.in/yaml.v2"
 	"html/template"
 	"io"
+	"net/http"
 )
+
+// DefaultClient returns an authenticated http client with the specified scopes
+func DefaultClient(ctx context.Context, scopes []string) (*http.Client, error) {
+	return google.DefaultClient(ctx, scopes...)
+}
 
 func toJSON(v interface{}) []byte {
 	output, _ := json.MarshalIndent(v, "", "  ")

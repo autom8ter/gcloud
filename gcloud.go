@@ -11,7 +11,6 @@ import (
 	"github.com/autom8ter/gcloud/video"
 	"github.com/golang/protobuf/proto"
 	"github.com/pkg/errors"
-	"golang.org/x/oauth2/google"
 	"google.golang.org/api/option"
 	"io"
 	"net/http"
@@ -158,9 +157,4 @@ func (g *GCP) Execute(fns ...HandlerFunc) error {
 // DefaultClient returns an authenticated http client with the specified scopes
 func (g *GCP) DefaultClient(ctx context.Context, scopes []string) (*http.Client, error) {
 	return DefaultClient(ctx, scopes)
-}
-
-// DefaultClient returns an authenticated http client with the specified scopes
-func DefaultClient(ctx context.Context, scopes []string) (*http.Client, error) {
-	return google.DefaultClient(ctx, scopes...)
 }
