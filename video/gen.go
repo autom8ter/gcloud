@@ -1,3 +1,3 @@
 //go:generate godocdown -o README.md
 
-package lang
+package video

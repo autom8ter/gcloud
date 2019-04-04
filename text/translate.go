@@ -1,4 +1,4 @@
-package lang
+package text
 
 import (
 	"cloud.google.com/go/translate"

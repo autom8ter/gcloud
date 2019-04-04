@@ -1,4 +1,4 @@
-package lang
+package text
 
 import (
 	speechpb "google.golang.org/genproto/googleapis/cloud/speech/v1"

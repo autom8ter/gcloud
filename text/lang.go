@@ -1,17 +1,17 @@
-package lang
+package text
 
 import (
 	"context"
 	"google.golang.org/api/option"
 )
 
-type Lang struct {
+type Text struct {
 	translator *Translator
 	t2p        *Text2Speech
 	spch       *Speech
 }
 
-func New(ctx context.Context, opts ...option.ClientOption) (*Lang, error) {
+func New(ctx context.Context, opts ...option.ClientOption) (*Text, error) {
 	tr, err := NewTranslator(ctx, opts...)
 	if err != nil {
 		return nil, err
@@ -25,26 +25,26 @@ func New(ctx context.Context, opts ...option.ClientOption) (*Lang, error) {
 		return nil, err
 	}
 
-	return &Lang{
+	return &Text{
 		translator: tr,
 		t2p:        t2p,
 		spch:       spch,
 	}, nil
 }
 
-func (l *Lang) Translator() *Translator {
+func (l *Text) Translator() *Translator {
 	return l.translator
 }
 
-func (l *Lang) Text2Speech() *Text2Speech {
+func (l *Text) Text2Speech() *Text2Speech {
 	return l.t2p
 }
 
-func (l *Lang) Speech() *Speech {
+func (l *Text) Speech() *Speech {
 	return l.spch
 }
 
-func (l *Lang) Close() {
+func (l *Text) Close() {
 	l.translator.Close()
 	l.t2p.Close()
 	l.spch.Close()

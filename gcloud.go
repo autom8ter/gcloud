@@ -2,9 +2,9 @@ package gcloud
 
 import (
 	"context"
-	"github.com/autom8ter/gcloud/lang"
 	"github.com/autom8ter/gcloud/pubsub"
-	"github.com/autom8ter/gcloud/vision"
+	"github.com/autom8ter/gcloud/text"
+	"github.com/autom8ter/gcloud/video"
 	"github.com/golang/protobuf/proto"
 	"github.com/pkg/errors"
 	"google.golang.org/api/option"
@@ -16,9 +16,9 @@ type Func func(g *GCP) error
 
 // GCP holds Google Cloud Platform Clients and carries some utility functions
 type GCP struct {
-	lng *lang.Lang
+	txt *text.Text
 	sub *pubsub.PubSub
-	vis *vision.Vision
+	vid *video.Video
 }
 
 // New returns a new authenticated GCP instance from the provided api options
@@ -26,7 +26,7 @@ func New(ctx context.Context, opts ...option.ClientOption) (*GCP, error) {
 	g := &GCP{}
 	var err error
 	var newErr error
-	g.lng, newErr = lang.New(ctx, opts...)
+	g.txt, newErr = text.New(ctx, opts...)
 	if err != nil {
 		err = errors.Wrap(err, newErr.Error())
 	}
@@ -34,16 +34,16 @@ func New(ctx context.Context, opts ...option.ClientOption) (*GCP, error) {
 	if err != nil {
 		err = errors.Wrap(err, newErr.Error())
 	}
-	g.vis, err = vision.New(ctx, opts...)
+	g.vid, err = video.New(ctx, opts...)
 	if err != nil {
 		err = errors.Wrap(err, newErr.Error())
 	}
 	return g, nil
 }
 
-// Lang returns a client used for GCP text2speech, translation, and speech services
-func (g *GCP) Lang() *lang.Lang {
-	return g.lng
+// Text returns a client used for common text operations: GCP text2speech, translation, and speech services
+func (g *GCP) Text() *text.Text {
+	return g.txt
 }
 
 // PubSub returns a client used for GCP pubsub
@@ -52,14 +52,15 @@ func (g *GCP) PubSub() *pubsub.PubSub {
 }
 
 // PubSub returns a client used for GCP video intelligence and computer vision
-func (g *GCP) Vision() *vision.Vision {
-	return g.vis
+func (g *GCP) Video() *video.Video {
+	return g.Video()
 }
 
 // Close closes all clients
 func (g *GCP) Close() {
-	g.lng.Close()
+	g.txt.Close()
 	g.sub.Close()
+	g.vid.Close()
 }
 
 // JSON formats an object and turns it into JSON bytes

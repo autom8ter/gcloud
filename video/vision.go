@@ -1,4 +1,4 @@
-package vision
+package video
 
 import (
 	"context"
@@ -8,7 +8,7 @@ import (
 type Vision struct {
 }
 
-func New(ctx context.Context, opts ...option.ClientOption) (*Vision, error) {
+func NewVision(ctx context.Context, opts ...option.ClientOption) (*Vision, error) {
 	return &Vision{}, nil
 }
 
