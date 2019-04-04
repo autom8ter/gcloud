@@ -6,6 +6,7 @@ import (
 	"github.com/autom8ter/gcloud/blob"
 	"github.com/autom8ter/gcloud/documents"
 	"github.com/autom8ter/gcloud/pubsub"
+	"github.com/autom8ter/gcloud/robots"
 	"github.com/autom8ter/gcloud/sql"
 	"github.com/autom8ter/gcloud/text"
 	"github.com/autom8ter/gcloud/trace"
@@ -40,6 +41,7 @@ type GCP struct {
 	doc *documents.Documents
 	blb *blob.Blob
 	trc *trace.Trace
+	bots *robots.Robot
 }
 
 // New returns a new authenticated GCP instance from the provided api options
@@ -79,6 +81,10 @@ func New(ctx context.Context, opts ...option.ClientOption) (*GCP, error) {
 	if err != nil {
 		err = errors.Wrap(err, newErr.Error())
 	}
+	g.bots, err = robots.New(ctx, opts...)
+	if err != nil {
+		err = errors.Wrap(err, newErr.Error())
+	}
 	return g, nil
 }
 
@@ -105,6 +111,12 @@ func (g *GCP) Video() *video.Video {
 // Auth returns a client used for GCP key management and IAM
 func (g *GCP) Auth() *auth.Auth {
 	return g.ath
+}
+
+
+// Auth returns a client used for GCP key management and IAM
+func (g *GCP) Robots() *robots.Robot {
+	return g.bots
 }
 
 // Blob returns a client used for GCP blob storage

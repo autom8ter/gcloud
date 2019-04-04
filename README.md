@@ -135,6 +135,13 @@ func (g *GCP) Render(text string, data interface{}, w io.Writer) error
 Render uses html/template along with the sprig funcmap functions to render a
 strings to an io writer ref: https://github.com/Masterminds/sprig
 
+#### func (*GCP) Robots
+
+```go
+func (g *GCP) Robots() *robots.Robot
+```
+Auth returns a client used for GCP key management and IAM
+
 #### func (*GCP) SQL
 
 ```go
