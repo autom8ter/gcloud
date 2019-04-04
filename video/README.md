@@ -126,14 +126,20 @@ type Vision struct {
 func NewVision(ctx context.Context, opts ...option.ClientOption) (*Vision, error)
 ```
 
-#### func (*Vision) Client
+#### func (*Vision) Annotator
 
 ```go
-func (v *Vision) Client()
+func (v *Vision) Annotator() *vision.ImageAnnotatorClient
 ```
 
 #### func (*Vision) Close
 
 ```go
 func (v *Vision) Close()
+```
+
+#### func (*Vision) ProductSearch
+
+```go
+func (v *Vision) ProductSearch() *vision.ProductSearchClient
 ```

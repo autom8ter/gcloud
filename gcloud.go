@@ -7,7 +7,6 @@ import (
 	"github.com/autom8ter/gcloud/documents"
 	"github.com/autom8ter/gcloud/pubsub"
 	"github.com/autom8ter/gcloud/robots"
-	"github.com/autom8ter/gcloud/sql"
 	"github.com/autom8ter/gcloud/text"
 	"github.com/autom8ter/gcloud/trace"
 	"github.com/autom8ter/gcloud/video"
@@ -37,7 +36,6 @@ type GCP struct {
 	sub *pubsub.PubSub
 	vid *video.Video
 	ath *auth.Auth
-	sQL *sql.SQL
 	doc *documents.Documents
 	blb *blob.Blob
 	trc *trace.Trace
@@ -70,10 +68,6 @@ func New(ctx context.Context, opts ...option.ClientOption) (*GCP, error) {
 		err = errors.Wrap(err, newErr.Error())
 	}
 	g.doc, err = documents.New(ctx, opts...)
-	if err != nil {
-		err = errors.Wrap(err, newErr.Error())
-	}
-	g.sQL, err = sql.New(ctx, opts...)
 	if err != nil {
 		err = errors.Wrap(err, newErr.Error())
 	}
@@ -127,11 +121,6 @@ func (g *GCP) Blob() *blob.Blob {
 // Docs returns a client used for GCP firestore (JSON documents)
 func (g *GCP) Docs() *documents.Documents {
 	return g.doc
-}
-
-// SQL returns a client used for GCP cloud sql
-func (g *GCP) SQL() *sql.SQL {
-	return g.sQL
 }
 
 // Close closes all clients

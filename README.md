@@ -142,13 +142,6 @@ func (g *GCP) Robots() *robots.Robot
 ```
 Auth returns a client used for GCP key management and IAM
 
-#### func (*GCP) SQL
-
-```go
-func (g *GCP) SQL() *sql.SQL
-```
-SQL returns a client used for GCP cloud sql
-
 #### func (*GCP) Text
 
 ```go

@@ -22,7 +22,7 @@ func New(ctx context.Context, opts ...option.ClientOption) (*Documents, error)
 #### func (*Documents) Client
 
 ```go
-func (v *Documents) Client()
+func (v *Documents) Client() *firestore.Client
 ```
 
 #### func (*Documents) Close
