@@ -10,35 +10,48 @@ import (
 	"gopkg.in/yaml.v2"
 	"html/template"
 	"io"
+	"log"
 	"net/http"
+	"os"
 )
 
 // DefaultClient returns an authenticated http client with the specified scopes
-func DefaultClient(ctx context.Context, scopes []string) (*http.Client, error) {
+func Client(ctx context.Context, scopes []string) (*http.Client, error) {
 	return google.DefaultClient(ctx, scopes...)
 }
 
-func toJSON(v interface{}) []byte {
+func JSON(v interface{}) []byte {
 	output, _ := json.MarshalIndent(v, "", "  ")
 	return output
 }
 
-func toProto(msg proto.Message) []byte {
+func Proto(msg proto.Message) []byte {
 	output, _ := proto.Marshal(msg)
 	return output
 }
 
-func toYAML(v interface{}) []byte {
+func YAML(v interface{}) []byte {
 	output, _ := yaml.Marshal(v)
 	return output
 }
 
-func toXML(v interface{}) []byte {
+func MustGetEnv(envKey, defaultValue string) string {
+	val := os.Getenv(envKey)
+	if val == "" {
+		val = defaultValue
+	}
+	if val == "" {
+		log.Fatalf("%q should be set", envKey)
+	}
+	return val
+}
+
+func XML(v interface{}) []byte {
 	output, _ := xml.Marshal(v)
 	return output
 }
 
-func render(text string, data interface{}, w io.Writer) error {
+func Render(text string, data interface{}, w io.Writer) error {
 	t, err := template.New("").Funcs(sprig.GenericFuncMap()).Parse(text)
 	if err != nil {
 		return err

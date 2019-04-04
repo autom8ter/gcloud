@@ -8,6 +8,7 @@ import (
 	"github.com/autom8ter/gcloud/pubsub"
 	"github.com/autom8ter/gcloud/sql"
 	"github.com/autom8ter/gcloud/text"
+	"github.com/autom8ter/gcloud/trace"
 	"github.com/autom8ter/gcloud/video"
 	"github.com/golang/protobuf/proto"
 	"github.com/pkg/errors"
@@ -38,6 +39,7 @@ type GCP struct {
 	sQL *sql.SQL
 	doc *documents.Documents
 	blb *blob.Blob
+	trc *trace.Trace
 }
 
 // New returns a new authenticated GCP instance from the provided api options
@@ -73,7 +75,16 @@ func New(ctx context.Context, opts ...option.ClientOption) (*GCP, error) {
 	if err != nil {
 		err = errors.Wrap(err, newErr.Error())
 	}
+	g.trc, err = trace.New()
+	if err != nil {
+		err = errors.Wrap(err, newErr.Error())
+	}
 	return g, nil
+}
+
+// Trace returns a registered stackdriver exporter
+func (g *GCP) Trace() *trace.Trace {
+	return g.trc
 }
 
 // Text returns a client used for common text operations: GCP text2speech, translation, and speech services
@@ -120,27 +131,27 @@ func (g *GCP) Close() {
 
 // JSON formats an object and turns it into JSON bytes
 func (g *GCP) JSON(obj interface{}) []byte {
-	return toJSON(obj)
+	return JSON(obj)
 }
 
 // XML formats an object and turns it into XML bytes
 func (g *GCP) XML(obj interface{}) []byte {
-	return toXML(obj)
+	return XML(obj)
 }
 
 // YAML formats an object and turns it into YAML bytes
 func (g *GCP) YAML(obj interface{}) []byte {
-	return toYAML(obj)
+	return YAML(obj)
 }
 
 // Proto formats an object and turns it into  Proto bytes
 func (g *GCP) Proto(m proto.Message) []byte {
-	return toProto(m)
+	return Proto(m)
 }
 
 // Render uses html/template along with the sprig funcmap functions to render a strings to an io writer ref: https://github.com/Masterminds/sprig
 func (g *GCP) Render(text string, data interface{}, w io.Writer) error {
-	return render(text, data, w)
+	return Render(text, data, w)
 }
 
 // Execute runs all functions and returns a wrapped error
@@ -156,5 +167,5 @@ func (g *GCP) Execute(fns ...HandlerFunc) error {
 
 // DefaultClient returns an authenticated http client with the specified scopes
 func (g *GCP) DefaultClient(ctx context.Context, scopes []string) (*http.Client, error) {
-	return DefaultClient(ctx, scopes)
+	return Client(ctx, scopes)
 }

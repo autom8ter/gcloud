@@ -5,12 +5,48 @@
 
 ## Usage
 
-#### func  DefaultClient
+#### func  Client
 
 ```go
-func DefaultClient(ctx context.Context, scopes []string) (*http.Client, error)
+func Client(ctx context.Context, scopes []string) (*http.Client, error)
 ```
 DefaultClient returns an authenticated http client with the specified scopes
+
+#### func  JSON
+
+```go
+func JSON(v interface{}) []byte
+```
+
+#### func  MustGetEnv
+
+```go
+func MustGetEnv(envKey, defaultValue string) string
+```
+
+#### func  Proto
+
+```go
+func Proto(msg proto.Message) []byte
+```
+
+#### func  Render
+
+```go
+func Render(text string, data interface{}, w io.Writer) error
+```
+
+#### func  XML
+
+```go
+func XML(v interface{}) []byte
+```
+
+#### func  YAML
+
+```go
+func YAML(v interface{}) []byte
+```
 
 #### type GCP
 
@@ -113,6 +149,13 @@ func (g *GCP) Text() *text.Text
 ```
 Text returns a client used for common text operations: GCP text2speech,
 translation, and speech services
+
+#### func (*GCP) Trace
+
+```go
+func (g *GCP) Trace() *trace.Trace
+```
+Trace returns a registered stackdriver exporter
 
 #### func (*GCP) Video
 
