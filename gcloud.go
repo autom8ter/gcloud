@@ -11,8 +11,8 @@ import (
 	"io"
 )
 
-// Func is used to run a function using a GCP object (see GCP.Execute)
-type Func func(g *GCP) error
+// HandlerFunc is used to run a function using a GCP object (see GCP.Execute)
+type HandlerFunc func(g *GCP) error
 
 // GCP holds Google Cloud Platform Clients and carries some utility functions
 type GCP struct {
@@ -89,7 +89,7 @@ func (g *GCP) Render(text string, data interface{}, w io.Writer) error {
 }
 
 // Execute runs all functions and returns a wrapped error
-func (g *GCP) Execute(fns ...Func) error {
+func (g *GCP) Execute(fns ...HandlerFunc) error {
 	var err error
 	for _, f := range fns {
 		if newErr := f(g); newErr != nil {
