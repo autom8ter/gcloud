@@ -66,27 +66,12 @@ func New(ctx context.Context, opts ...option.ClientOption) (*GCP, error)
 ```
 New returns a new authenticated GCP instance from the provided api options
 
-#### func (*GCP) Auth
-
-```go
-func (g *GCP) Auth() *auth.Auth
-```
-Auth returns a client used for GCP key management and IAM
-
 #### func (*GCP) Close
 
 ```go
 func (g *GCP) Close()
 ```
 Close closes all clients
-
-#### func (*GCP) Cluster
-
-```go
-func (g *GCP) Cluster() *cluster.Cluster
-```
-Cluster returns a registered kubernetes clientset "GCLOUD_CLUSTER_MASTER"
-"GCLOUD_CLUSTER"
 
 #### func (*GCP) DefaultClient
 
@@ -109,13 +94,6 @@ func (g *GCP) Proto(m proto.Message) []byte
 ```
 Proto formats an object and turns it into Proto bytes
 
-#### func (*GCP) PubSub
-
-```go
-func (g *GCP) PubSub() *pubsub.PubSub
-```
-PubSub returns a client used for GCP pubsub
-
 #### func (*GCP) Render
 
 ```go
@@ -124,43 +102,59 @@ func (g *GCP) Render(text string, data interface{}, w io.Writer) error
 Render uses html/template along with the sprig funcmap functions to render a
 strings to an io writer ref: https://github.com/Masterminds/sprig
 
-#### func (*GCP) Robots
+#### func (*GCP) ToChinese
 
 ```go
-func (g *GCP) Robots() *robots.Robot
+func (g *GCP) ToChinese(ctx context.Context, content []string) ([]string, error)
 ```
-Auth returns a client used for GCP key management and IAM
+ToSpanish returns the provided content in Chinese
 
-#### func (*GCP) Storage
+#### func (*GCP) ToFrench
 
 ```go
-func (g *GCP) Storage() *storage.Storage
+func (g *GCP) ToFrench(ctx context.Context, content []string) ([]string, error)
 ```
-Storage returns a client used for GCP blob storage, firestore (documents), and
-cloud sql spanner
+ToFrench returns the provided content in French
 
-#### func (*GCP) Text
+#### func (*GCP) ToGerman
 
 ```go
-func (g *GCP) Text() *text.Text
+func (g *GCP) ToGerman(ctx context.Context, content []string) ([]string, error)
 ```
-Text returns a client used for common text operations: GCP text2speech,
-translation, and speech services
+ToGerman returns the provided content in German
 
-#### func (*GCP) Trace
+#### func (*GCP) ToItalian
 
 ```go
-func (g *GCP) Trace() *trace.Trace
+func (g *GCP) ToItalian(ctx context.Context, content []string) ([]string, error)
 ```
-Trace returns a registered stackdriver exporter
+ToItalian returns the provided content in Italian
 
-#### func (*GCP) Video
+#### func (*GCP) ToRussian
 
 ```go
-func (g *GCP) Video() *video.Video
+func (g *GCP) ToRussian(ctx context.Context, content []string) ([]string, error)
 ```
-Video returns a client used for torrenting(non-gcp), GCP video intelligence and
-GCP computer vision
+ToRussian returns the provided content in Russian
+
+#### func (*GCP) ToSpanish
+
+```go
+func (g *GCP) ToSpanish(ctx context.Context, content []string) ([]string, error)
+```
+ToSpanish returns the provided content in Spanish
+
+#### func (*GCP) WriteAudioTranscript
+
+```go
+func (g *GCP) WriteAudioTranscript(ctx context.Context, audioURL string, w io.Writer) error
+```
+
+#### func (*GCP) WriteTextToSpeechMP3
+
+```go
+func (g *GCP) WriteTextToSpeechMP3(ctx context.Context, text string, w io.Writer) error
+```
 
 #### func (*GCP) XML
 

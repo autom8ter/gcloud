@@ -2,6 +2,7 @@ package gcloud_test
 
 import (
 	"context"
+	"fmt"
 	"github.com/autom8ter/gcloud"
 	"google.golang.org/api/option"
 	"testing"
@@ -9,6 +10,8 @@ import (
 )
 
 var ctx = context.Background()
+var toTranslate = []string{"Hello World!"}
+var translated = map[string][]string{}
 
 type User struct {
 	ID          string
@@ -29,4 +32,26 @@ func Test(t *testing.T) {
 	if g == nil {
 		t.Fatal("nil gcloud")
 	}
+	{
+		chi, err := g.ToChinese(ctx, toTranslate)
+		if err != nil {
+			t.Fatal(err.Error())
+		}
+		translated["chinese"] = chi
+	}
+	{
+		spa, err := g.ToSpanish(ctx, toTranslate)
+		if err != nil {
+			t.Fatal(err.Error())
+		}
+		translated["spanish"] = spa
+	}
+	{
+		fr, err := g.ToFrench(ctx, toTranslate)
+		if err != nil {
+			t.Fatal(err.Error())
+		}
+		translated["french"] = fr
+	}
+	fmt.Println(string(g.JSON(translated)))
 }

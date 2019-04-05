@@ -70,46 +70,6 @@ func New(ctx context.Context, opts ...option.ClientOption) (*GCP, error) {
 	return g, nil
 }
 
-// Cluster returns a registered kubernetes clientset "GCLOUD_CLUSTER_MASTER" "GCLOUD_CLUSTER"
-func (g *GCP) Cluster() *cluster.Cluster {
-	return g.kube
-}
-
-// Trace returns a registered stackdriver exporter
-func (g *GCP) Trace() *trace.Trace {
-	return g.trc
-}
-
-// Text returns a client used for common text operations: GCP text2speech, translation, and speech services
-func (g *GCP) Text() *text.Text {
-	return g.txt
-}
-
-// PubSub returns a client used for GCP pubsub
-func (g *GCP) PubSub() *pubsub.PubSub {
-	return g.sub
-}
-
-// Video returns a client used for torrenting(non-gcp), GCP video  intelligence and GCP computer vision
-func (g *GCP) Video() *video.Video {
-	return g.vid
-}
-
-// Auth returns a client used for GCP key management and IAM
-func (g *GCP) Auth() *auth.Auth {
-	return g.ath
-}
-
-// Auth returns a client used for GCP key management and IAM
-func (g *GCP) Robots() *robots.Robot {
-	return g.bots
-}
-
-// Storage returns a client used for GCP blob storage, firestore (documents), and cloud sql spanner
-func (g *GCP) Storage() *storage.Storage {
-	return g.strg
-}
-
 // Close closes all clients
 func (g *GCP) Close() {
 	g.txt.Close()
