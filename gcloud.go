@@ -17,19 +17,6 @@ import (
 	"net/http"
 )
 
-// HandlerFunc is used to run a function using a GCP object (see GCP.Execute)
-// Creating a HandlerFunc is easy...
-/*
-	func NewHandlerFunc() HandlerFunc {
-		return func(g *GCP) error {
-
-		this is similar to http.HandlerFunc...
-
-		return nil
-	}}
-*/
-type HandlerFunc func(g *GCP) error
-
 // GCP holds Google Cloud Platform Clients and carries some utility functions
 // optional environmental variables: "GCLOUD_PROJECTID", "GCLOUD_SPANNER_DB" "GCLOUD_CLUSTER_MASTER" "GCLOUD_CLUSTER"
 type GCP struct {
@@ -103,7 +90,7 @@ func (g *GCP) PubSub() *pubsub.PubSub {
 	return g.sub
 }
 
-// Video returns a client used for GCP video intelligence and computer vision
+// Video returns a client used for torrenting(non-gcp), GCP video  intelligence and GCP computer vision
 func (g *GCP) Video() *video.Video {
 	return g.vid
 }
@@ -132,6 +119,7 @@ func (g *GCP) Close() {
 	g.ath.Close()
 	g.strg.Close()
 	g.trc.Flush()
+	g.kube.Close()
 }
 
 // JSON formats an object and turns it into JSON bytes
@@ -157,17 +145,6 @@ func (g *GCP) Proto(m proto.Message) []byte {
 // Render uses html/template along with the sprig funcmap functions to render a strings to an io writer ref: https://github.com/Masterminds/sprig
 func (g *GCP) Render(text string, data interface{}, w io.Writer) error {
 	return Render(text, data, w)
-}
-
-// Execute runs all functions and returns a wrapped error
-func (g *GCP) Execute(fns ...HandlerFunc) error {
-	var err error
-	for _, f := range fns {
-		if newErr := f(g); newErr != nil {
-			err = errors.Wrap(err, newErr.Error())
-		}
-	}
-	return err
 }
 
 // DefaultClient returns an authenticated http client with the specified scopes

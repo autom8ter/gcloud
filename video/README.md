@@ -80,6 +80,32 @@ func (i *Intelligence) TrackObjectsFromStorage(ctx context.Context, gcsURI strin
 func (i *Intelligence) TranscribeSpeech(ctx context.Context, r io.Reader, w io.Writer) (*videopb.AnnotateVideoResponse, error)
 ```
 
+#### type Torrent
+
+```go
+type Torrent struct {
+}
+```
+
+
+#### func  NewTorrent
+
+```go
+func NewTorrent() (*Torrent, error)
+```
+
+#### func (*Torrent) Client
+
+```go
+func (t *Torrent) Client() *goflix.GoFlix
+```
+
+#### func (*Torrent) Close
+
+```go
+func (t *Torrent) Close()
+```
+
 #### type Video
 
 ```go
@@ -104,6 +130,12 @@ func (v *Video) Close()
 
 ```go
 func (v *Video) Intelligence() *Intelligence
+```
+
+#### func (*Video) Torrent
+
+```go
+func (v *Video) Torrent() *Torrent
 ```
 
 #### func (*Video) Vision

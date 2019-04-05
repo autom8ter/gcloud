@@ -20,7 +20,7 @@ func New(ctx context.Context, opts ...option.ClientOption) (*Video, error) {
 		err = errors.Wrap(err, newErr.Error())
 	}
 	v.vis, newErr = NewVision(ctx, opts...)
-	if err != nil {
+	if newErr != nil {
 		err = errors.Wrap(err, newErr.Error())
 	}
 	return v, err

@@ -56,7 +56,8 @@ type GCP struct {
 ```
 
 GCP holds Google Cloud Platform Clients and carries some utility functions
-environmental variables: "GCLOUD_PROJECTID", "GCLOUD_SPANNER_DB"
+optional environmental variables: "GCLOUD_PROJECTID", "GCLOUD_SPANNER_DB"
+"GCLOUD_CLUSTER_MASTER" "GCLOUD_CLUSTER"
 
 #### func  New
 
@@ -84,7 +85,8 @@ Close closes all clients
 ```go
 func (g *GCP) Cluster() *cluster.Cluster
 ```
-Cluster returns a registered kubernetes client
+Cluster returns a registered kubernetes clientset "GCLOUD_CLUSTER_MASTER"
+"GCLOUD_CLUSTER"
 
 #### func (*GCP) DefaultClient
 
@@ -96,7 +98,7 @@ DefaultClient returns an authenticated http client with the specified scopes
 #### func (*GCP) Execute
 
 ```go
-func (g *GCP) Execute(fns ...HandlerFunc) error
+func (g *GCP) Execute(ctx context.Context, fns ...HandlerFunc) error
 ```
 Execute runs all functions and returns a wrapped error
 
@@ -164,7 +166,8 @@ Trace returns a registered stackdriver exporter
 ```go
 func (g *GCP) Video() *video.Video
 ```
-Video returns a client used for GCP video intelligence and computer vision
+Video returns a client used for torrenting(non-gcp), GCP video intelligence and
+GCP computer vision
 
 #### func (*GCP) XML
 
