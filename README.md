@@ -52,6 +52,14 @@ func YAML(v interface{}) []byte
 
 ```go
 type GCP struct {
+	Text    *text.Text
+	PubSub  *pubsub.PubSub
+	Vid     *video.Video
+	Auth    *auth.Auth
+	Storage *storage.Storage
+	Trace   *trace.Trace
+	Bots    *robots.Robot
+	Kube    *cluster.Cluster
 }
 ```
 
@@ -101,60 +109,6 @@ func (g *GCP) Render(text string, data interface{}, w io.Writer) error
 ```
 Render uses html/template along with the sprig funcmap functions to render a
 strings to an io writer ref: https://github.com/Masterminds/sprig
-
-#### func (*GCP) ToChinese
-
-```go
-func (g *GCP) ToChinese(ctx context.Context, content []string) ([]string, error)
-```
-ToSpanish returns the provided content in Chinese
-
-#### func (*GCP) ToFrench
-
-```go
-func (g *GCP) ToFrench(ctx context.Context, content []string) ([]string, error)
-```
-ToFrench returns the provided content in French
-
-#### func (*GCP) ToGerman
-
-```go
-func (g *GCP) ToGerman(ctx context.Context, content []string) ([]string, error)
-```
-ToGerman returns the provided content in German
-
-#### func (*GCP) ToItalian
-
-```go
-func (g *GCP) ToItalian(ctx context.Context, content []string) ([]string, error)
-```
-ToItalian returns the provided content in Italian
-
-#### func (*GCP) ToRussian
-
-```go
-func (g *GCP) ToRussian(ctx context.Context, content []string) ([]string, error)
-```
-ToRussian returns the provided content in Russian
-
-#### func (*GCP) ToSpanish
-
-```go
-func (g *GCP) ToSpanish(ctx context.Context, content []string) ([]string, error)
-```
-ToSpanish returns the provided content in Spanish
-
-#### func (*GCP) WriteAudioTranscript
-
-```go
-func (g *GCP) WriteAudioTranscript(ctx context.Context, audioURL string, w io.Writer) error
-```
-
-#### func (*GCP) WriteTextToSpeechMP3
-
-```go
-func (g *GCP) WriteTextToSpeechMP3(ctx context.Context, text string, w io.Writer) error
-```
 
 #### func (*GCP) XML
 

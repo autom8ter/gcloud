@@ -20,14 +20,14 @@ import (
 // GCP holds Google Cloud Platform Clients and carries some utility functions
 // optional environmental variables: "GCLOUD_PROJECTID", "GCLOUD_SPANNER_DB" "GCLOUD_CLUSTER_MASTER" "GCLOUD_CLUSTER"
 type GCP struct {
-	txt  *text.Text
-	sub  *pubsub.PubSub
-	vid  *video.Video
-	ath  *auth.Auth
-	strg *storage.Storage
-	trc  *trace.Trace
-	bots *robots.Robot
-	kube *cluster.Cluster
+	Text    *text.Text
+	PubSub  *pubsub.PubSub
+	Vid     *video.Video
+	Auth    *auth.Auth
+	Storage *storage.Storage
+	Trace   *trace.Trace
+	Bots    *robots.Robot
+	Kube    *cluster.Cluster
 }
 
 // New returns a new authenticated GCP instance from the provided api options
@@ -35,35 +35,35 @@ func New(ctx context.Context, opts ...option.ClientOption) (*GCP, error) {
 	g := &GCP{}
 	var err error
 	var newErr error
-	g.txt, newErr = text.New(ctx, opts...)
+	g.Text, newErr = text.New(ctx, opts...)
 	if newErr != nil {
 		err = errors.Wrap(err, newErr.Error())
 	}
-	g.sub, newErr = pubsub.New(ctx, opts...)
+	g.PubSub, newErr = pubsub.New(ctx, opts...)
 	if newErr != nil {
 		err = errors.Wrap(err, newErr.Error())
 	}
-	g.vid, newErr = video.New(ctx, opts...)
+	g.Vid, newErr = video.New(ctx, opts...)
 	if newErr != nil {
 		err = errors.Wrap(err, newErr.Error())
 	}
-	g.ath, newErr = auth.New(ctx, opts...)
+	g.Auth, newErr = auth.New(ctx, opts...)
 	if newErr != nil {
 		err = errors.Wrap(err, newErr.Error())
 	}
-	g.strg, newErr = storage.New(ctx, opts...)
+	g.Storage, newErr = storage.New(ctx, opts...)
 	if newErr != nil {
 		err = errors.Wrap(err, newErr.Error())
 	}
-	g.trc, newErr = trace.New()
+	g.Trace, newErr = trace.New()
 	if newErr != nil {
 		err = errors.Wrap(err, newErr.Error())
 	}
-	g.bots, newErr = robots.New(ctx, opts...)
+	g.Bots, newErr = robots.New(ctx, opts...)
 	if newErr != nil {
 		err = errors.Wrap(err, newErr.Error())
 	}
-	g.kube, newErr = cluster.New()
+	g.Kube, newErr = cluster.New()
 	if newErr != nil {
 		err = errors.Wrap(err, newErr.Error())
 	}
@@ -72,14 +72,14 @@ func New(ctx context.Context, opts ...option.ClientOption) (*GCP, error) {
 
 // Close closes all clients
 func (g *GCP) Close() {
-	g.txt.Close()
-	g.sub.Close()
-	g.vid.Close()
-	g.bots.Close()
-	g.ath.Close()
-	g.strg.Close()
-	g.trc.Flush()
-	g.kube.Close()
+	g.Text.Close()
+	g.PubSub.Close()
+	g.Vid.Close()
+	g.Bots.Close()
+	g.Auth.Close()
+	g.Storage.Close()
+	g.Kube.Close()
+	g.Trace.Flush()
 }
 
 // JSON formats an object and turns it into JSON bytes
