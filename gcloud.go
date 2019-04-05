@@ -3,6 +3,7 @@ package gcloud
 import (
 	"context"
 	"github.com/autom8ter/gcloud/auth"
+	"github.com/autom8ter/gcloud/cluster"
 	"github.com/autom8ter/gcloud/pubsub"
 	"github.com/autom8ter/gcloud/robots"
 	"github.com/autom8ter/gcloud/storage"
@@ -39,6 +40,7 @@ type GCP struct {
 	strg *storage.Storage
 	trc  *trace.Trace
 	bots *robots.Robot
+	kube *cluster.Cluster
 }
 
 // New returns a new authenticated GCP instance from the provided api options
@@ -74,7 +76,16 @@ func New(ctx context.Context, opts ...option.ClientOption) (*GCP, error) {
 	if newErr != nil {
 		err = errors.Wrap(err, newErr.Error())
 	}
+	g.kube, newErr = cluster.New(ctx, opts...)
+	if newErr != nil {
+		err = errors.Wrap(err, newErr.Error())
+	}
 	return g, nil
+}
+
+// Cluster returns a registered kubernetes client
+func (g *GCP) Cluster() *cluster.Cluster {
+	return g.kube
 }
 
 // Trace returns a registered stackdriver exporter

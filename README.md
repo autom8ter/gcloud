@@ -79,6 +79,13 @@ func (g *GCP) Close()
 ```
 Close closes all clients
 
+#### func (*GCP) Cluster
+
+```go
+func (g *GCP) Cluster() *cluster.Cluster
+```
+Cluster returns a registered kubernetes client
+
 #### func (*GCP) DefaultClient
 
 ```go
