@@ -31,7 +31,7 @@ import (
 type HandlerFunc func(g *GCP) error
 
 // GCP holds Google Cloud Platform Clients and carries some utility functions
-// environmental variables: "GCLOUD_PROJECTID", "GCLOUD_SPANNER_DB"
+// optional environmental variables: "GCLOUD_PROJECTID", "GCLOUD_SPANNER_DB" "GCLOUD_CLUSTER_MASTER" "GCLOUD_CLUSTER"
 type GCP struct {
 	txt  *text.Text
 	sub  *pubsub.PubSub
@@ -76,14 +76,14 @@ func New(ctx context.Context, opts ...option.ClientOption) (*GCP, error) {
 	if newErr != nil {
 		err = errors.Wrap(err, newErr.Error())
 	}
-	g.kube, newErr = cluster.New(ctx, opts...)
+	g.kube, newErr = cluster.New()
 	if newErr != nil {
 		err = errors.Wrap(err, newErr.Error())
 	}
 	return g, nil
 }
 
-// Cluster returns a registered kubernetes client
+// Cluster returns a registered kubernetes clientset "GCLOUD_CLUSTER_MASTER" "GCLOUD_CLUSTER"
 func (g *GCP) Cluster() *cluster.Cluster {
 	return g.kube
 }
