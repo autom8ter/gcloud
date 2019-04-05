@@ -8,7 +8,8 @@ import (
 	"golang.org/x/text/language"
 	speechpb "google.golang.org/genproto/googleapis/cloud/speech/v1"
 	texttospeechpb "google.golang.org/genproto/googleapis/cloud/texttospeech/v1"
-	"io"
+	"io/ioutil"
+	"net/http"
 )
 
 // ToSpanish returns the provided content in Spanish
@@ -107,39 +108,49 @@ func (g *GCP) ToRussian(ctx context.Context, content []string) ([]string, error)
 	return trans, nil
 }
 
-func (g *GCP) WriteTextToSpeechMP3(ctx context.Context, text string, w io.Writer) error {
-	return g.txt.Text2Speech().SynthesizeSpeech(ctx, w, func(r *texttospeechpb.SynthesizeSpeechRequest) {
-		r.Input.InputSource = &texttospeechpb.SynthesisInput_Text{Text: text}
-		r.Voice = &texttospeechpb.VoiceSelectionParams{
-			LanguageCode: "en-US",
-			SsmlGender:   texttospeechpb.SsmlVoiceGender_NEUTRAL,
+//Write Audio Transcript from audio URL found in URL header
+func (g *GCP) WriteAudioTranscript(ctx context.Context) http.HandlerFunc {
+	return func(w http.ResponseWriter, req *http.Request) {
+		resp, err := g.txt.Speech().Recognize(ctx, func(r *speechpb.RecognizeRequest) {
+			r.Config = &speechpb.RecognitionConfig{
+				Encoding:        speechpb.RecognitionConfig_LINEAR16,
+				SampleRateHertz: 16000,
+				LanguageCode:    "en-US",
+			}
+			r.Audio = &speechpb.RecognitionAudio{
+				AudioSource: &speechpb.RecognitionAudio_Uri{Uri: req.Header["URL"][0]}}
+
+		})
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
 		}
-		r.AudioConfig = &texttospeechpb.AudioConfig{
-			AudioEncoding: texttospeechpb.AudioEncoding_MP3,
+		// Print the results.
+		for _, result := range resp.Results {
+			fmt.Fprint(w, string(g.JSON(result)))
 		}
-	})
+	}
 }
 
-func (g *GCP) WriteAudioTranscript(ctx context.Context, audioURL string, w io.Writer) error {
-	resp, err := g.txt.Speech().Recognize(ctx, func(r *speechpb.RecognizeRequest) {
-		r.Config = &speechpb.RecognitionConfig{
-			Encoding:        speechpb.RecognitionConfig_LINEAR16,
-			SampleRateHertz: 16000,
-			LanguageCode:    "en-US",
+//WriteTextToSpeechMP3 converts text to speech from request body
+func (g *GCP) WriteTextToSpeechMP3(ctx context.Context) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		bits, err := ioutil.ReadAll(r.Body)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
 		}
-		r.Audio = &speechpb.RecognitionAudio{
-			AudioSource: &speechpb.RecognitionAudio_Uri{Uri: audioURL},
+		if err := g.txt.Text2Speech().SynthesizeSpeech(ctx, w, func(r *texttospeechpb.SynthesizeSpeechRequest) {
+			r.Input.InputSource = &texttospeechpb.SynthesisInput_Text{Text: string(bits)}
+			r.Voice = &texttospeechpb.VoiceSelectionParams{
+				LanguageCode: "en-US",
+				SsmlGender:   texttospeechpb.SsmlVoiceGender_NEUTRAL,
+			}
+			r.AudioConfig = &texttospeechpb.AudioConfig{
+				AudioEncoding: texttospeechpb.AudioEncoding_MP3,
+			}
+		}); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
-
-	})
-	if err != nil {
-		return err
 	}
-	// Print the results.
-	for _, result := range resp.Results {
-		for _, alt := range result.Alternatives {
-			fmt.Fprintf(w, "\"%v\" (confidence=%3f)\n", alt.Transcript, alt.Confidence)
-		}
-	}
-	return nil
 }
