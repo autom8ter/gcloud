@@ -30,6 +30,7 @@ import (
 type HandlerFunc func(g *GCP) error
 
 // GCP holds Google Cloud Platform Clients and carries some utility functions
+// environmental variables: "GCLOUD_PROJECTID", "GCLOUD_SPANNER_DB"
 type GCP struct {
 	txt  *text.Text
 	sub  *pubsub.PubSub

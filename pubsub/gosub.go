@@ -7,6 +7,7 @@ import (
 	"google.golang.org/api/iterator"
 	"google.golang.org/api/option"
 	"log"
+	"os"
 )
 
 type PubSub struct {
@@ -14,7 +15,7 @@ type PubSub struct {
 }
 
 func New(ctx context.Context, options ...option.ClientOption) (*PubSub, error) {
-	s, err := pubsub.NewClient(ctx, "", options...)
+	s, err := pubsub.NewClient(ctx, os.Getenv("GCLOUD_PROJECTID"), options...)
 	if err != nil {
 		return nil, err
 	}

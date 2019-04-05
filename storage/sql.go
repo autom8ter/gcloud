@@ -7,19 +7,21 @@ import (
 	"github.com/pkg/errors"
 	"google.golang.org/api/option"
 	adminpb "google.golang.org/genproto/googleapis/spanner/admin/database/v1"
+	"os"
 	"time"
 )
 
 type TableMap map[string]map[string]interface{}
 type TableStruct map[string]interface{}
 
-type SQLOption func(request *adminpb.CreateDatabaseRequest)
+type SQLCreate func(request *adminpb.CreateDatabaseRequest)
 
 type SQL struct {
 	admin *database.DatabaseAdminClient
 	span  *spanner.Client
 }
 
+//Must set ""GCLOUD_SPANNER_DB"" in environmental variables
 func NewSQL(ctx context.Context, opts ...option.ClientOption) (*SQL, error) {
 	s := &SQL{}
 	var err error
@@ -29,7 +31,7 @@ func NewSQL(ctx context.Context, opts ...option.ClientOption) (*SQL, error) {
 	if newErr != nil {
 		err = errors.Wrap(err, newErr.Error())
 	}
-	s.span, newErr = spanner.NewClient(ctx, "", opts...)
+	s.span, newErr = spanner.NewClient(ctx, os.Getenv("GCLOUD_SPANNER_DB"), opts...)
 	if newErr != nil {
 		err = errors.Wrap(err, newErr.Error())
 	}
@@ -49,7 +51,7 @@ func (s *SQL) Spanner() *spanner.Client {
 	return s.span
 }
 
-func (s *SQL) CreateDatabase(ctx context.Context, opts ...SQLOption) (*database.CreateDatabaseOperation, error) {
+func (s *SQL) CreateDatabase(ctx context.Context, opts ...SQLCreate) (*database.CreateDatabaseOperation, error) {
 	r := &adminpb.CreateDatabaseRequest{}
 	for _, o := range opts {
 		o(r)
