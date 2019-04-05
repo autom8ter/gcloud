@@ -47,31 +47,31 @@ func New(ctx context.Context, opts ...option.ClientOption) (*GCP, error) {
 	var err error
 	var newErr error
 	g.txt, newErr = text.New(ctx, opts...)
-	if err != nil {
+	if newErr != nil {
 		err = errors.Wrap(err, newErr.Error())
 	}
 	g.sub, newErr = pubsub.New(ctx, opts...)
-	if err != nil {
+	if newErr != nil {
 		err = errors.Wrap(err, newErr.Error())
 	}
 	g.vid, newErr = video.New(ctx, opts...)
-	if err != nil {
+	if newErr != nil {
 		err = errors.Wrap(err, newErr.Error())
 	}
 	g.ath, newErr = auth.New(ctx, opts...)
-	if err != nil {
+	if newErr != nil {
 		err = errors.Wrap(err, newErr.Error())
 	}
 	g.strg, newErr = storage.New(ctx, opts...)
-	if err != nil {
+	if newErr != nil {
 		err = errors.Wrap(err, newErr.Error())
 	}
-	g.trc, err = trace.New()
-	if err != nil {
+	g.trc, newErr = trace.New()
+	if newErr != nil {
 		err = errors.Wrap(err, newErr.Error())
 	}
-	g.bots, err = robots.New(ctx, opts...)
-	if err != nil {
+	g.bots, newErr = robots.New(ctx, opts...)
+	if newErr != nil {
 		err = errors.Wrap(err, newErr.Error())
 	}
 	return g, nil
