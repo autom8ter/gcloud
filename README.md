@@ -56,6 +56,7 @@ type GCP struct {
 ```
 
 GCP holds Google Cloud Platform Clients and carries some utility functions
+environmental variables: "GCLOUD_PROJECTID", "GCLOUD_SPANNER_DB"
 
 #### func  New
 
@@ -133,7 +134,8 @@ Auth returns a client used for GCP key management and IAM
 ```go
 func (g *GCP) Storage() *storage.Storage
 ```
-Blob returns a client used for GCP blob storage
+Storage returns a client used for GCP blob storage, firestore (documents), and
+cloud sql spanner
 
 #### func (*GCP) Text
 

@@ -111,6 +111,64 @@ func (v *Document) Client() *firestore.Client
 func (v *Document) Close()
 ```
 
+#### type SQL
+
+```go
+type SQL struct {
+}
+```
+
+
+#### func  NewSQL
+
+```go
+func NewSQL(ctx context.Context, opts ...option.ClientOption) (*SQL, error)
+```
+Must set ""GCLOUD_SPANNER_DB"" in environmental variables
+
+#### func (*SQL) Admin
+
+```go
+func (s *SQL) Admin() *database.DatabaseAdminClient
+```
+
+#### func (*SQL) Close
+
+```go
+func (s *SQL) Close()
+```
+
+#### func (*SQL) CreateDatabase
+
+```go
+func (s *SQL) CreateDatabase(ctx context.Context, opts ...SQLCreate) (*database.CreateDatabaseOperation, error)
+```
+
+#### func (*SQL) InsertStructs
+
+```go
+func (s *SQL) InsertStructs(ctx context.Context, tables ...TableStruct) (time.Time, error)
+```
+
+#### func (*SQL) InsertTables
+
+```go
+func (s *SQL) InsertTables(ctx context.Context, tables ...TableMap) (time.Time, error)
+```
+
+#### func (*SQL) Spanner
+
+```go
+func (s *SQL) Spanner() *spanner.Client
+```
+
+#### type SQLCreate
+
+```go
+type SQLCreate func(request *adminpb.CreateDatabaseRequest)
+```
+
+
 #### type SignedUrlFunc
 
 ```go
@@ -138,8 +196,33 @@ func New(ctx context.Context, opts ...option.ClientOption) (*Storage, error)
 func (s *Storage) Blob() *Blob
 ```
 
+#### func (*Storage) Close
+
+```go
+func (s *Storage) Close()
+```
+
 #### func (*Storage) Document
 
 ```go
 func (s *Storage) Document() *Document
+```
+
+#### func (*Storage) SQL
+
+```go
+func (s *Storage) SQL() *SQL
+```
+
+#### type TableMap
+
+```go
+type TableMap map[string]map[string]interface{}
+```
+
+
+#### type TableStruct
+
+```go
+type TableStruct map[string]interface{}
 ```
