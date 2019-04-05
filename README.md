@@ -95,13 +95,6 @@ func (g *GCP) DefaultClient(ctx context.Context, scopes []string) (*http.Client,
 ```
 DefaultClient returns an authenticated http client with the specified scopes
 
-#### func (*GCP) Execute
-
-```go
-func (g *GCP) Execute(ctx context.Context, fns ...HandlerFunc) error
-```
-Execute runs all functions and returns a wrapped error
-
 #### func (*GCP) JSON
 
 ```go
@@ -182,20 +175,3 @@ XML formats an object and turns it into XML bytes
 func (g *GCP) YAML(obj interface{}) []byte
 ```
 YAML formats an object and turns it into YAML bytes
-
-#### type HandlerFunc
-
-```go
-type HandlerFunc func(g *GCP) error
-```
-
-HandlerFunc is used to run a function using a GCP object (see GCP.Execute)
-Creating a HandlerFunc is easy...
-
-    func NewHandlerFunc() HandlerFunc {
-    	return func(g *GCP) error {
-
-    	this is similar to http.HandlerFunc...
-
-    	return nil
-    }}
