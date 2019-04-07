@@ -103,10 +103,9 @@ type Clients struct {
 
 // GCP holds Google Cloud Platform Clients and Services
 type GCP struct {
-	ctx     context.Context       `validate:"required"`
-	cfg     *Config               `validate:"required"`
-	hTTP    *http.Client          `validate:"required"`
-	trce    *stackdriver.Exporter `validate:"required"`
+	ctx     context.Context `validate:"required"`
+	cfg     *Config         `validate:"required"`
+	hTTP    *http.Client    `validate:"required"`
 	clients *Clients
 	svcs    *Services
 	err     *multierror.Error
@@ -285,7 +284,6 @@ func New(ctx context.Context, cfg *Config) *GCP {
 		ctx:  ctx,
 		cfg:  cfg,
 		hTTP: cli,
-		trce: trc,
 		err:  multiErr,
 		svcs: &Services{
 			Container:    tain,
@@ -347,7 +345,6 @@ func (g *GCP) Close() {
 	_ = g.clients.Translate.Close()
 	_ = g.clients.Keys.Close()
 	_ = g.clients.VideoIntelligence.Close()
-	g.trce.Flush()
 }
 
 // FromContext returns the value the context is holding from the given key
@@ -387,17 +384,9 @@ func (g *GCP) Clients() *Clients {
 	return g.clients
 }
 
-// Trace returns a stackdriver exporter
-func (g *GCP) Trace() *stackdriver.Exporter {
-	if g.trce == nil {
-		panic("exporter is uninitialized- use gcloud.New to initialize the GCP instance")
-	}
-	return g.trce
-}
-
 // HTTP returns a google default HTTP client
 func (g *GCP) HTTP() *http.Client {
-	if g.trce == nil {
+	if g.hTTP == nil {
 		panic("http client is uninitialized- use gcloud.New to initialize the GCP instance")
 	}
 	return g.hTTP
