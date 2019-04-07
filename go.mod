@@ -2,8 +2,8 @@ module github.com/autom8ter/gcloud
 
 require (
 	cloud.google.com/go v0.37.2
-	contrib.go.opencensus.io/exporter/stackdriver v0.10.0
-	github.com/autom8ter/objectify v0.0.0-20190407094657-91bdd7133430
+	contrib.go.opencensus.io/exporter/stackdriver v0.10.0 // indirect
+	github.com/autom8ter/objectify v0.0.0-20190407102447-e8d21d988edc
 	github.com/google/gofuzz v0.0.0-20170612174753-24818f796faf // indirect
 	github.com/googleapis/gnostic v0.2.0 // indirect
 	github.com/hashicorp/go-multierror v1.0.0

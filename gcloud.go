@@ -82,14 +82,14 @@ type Services struct {
 
 // GCP ClientSet
 type Clients struct {
-	PubSub             *pubsub.Client
+	PubSub             *pubsub.Client `validate:"required"`
 	IAM                *iam.Service
-	Storage            *storage.Client
+	Storage            *storage.Client `validate:"required"`
 	Spanner            *spanner.Client
 	DBAdmin            *database.DatabaseAdminClient
-	FireStore          *firestore.Client
+	FireStore          *firestore.Client `validate:"required"`
 	IOT                *iot.DeviceManagerClient
-	Kube               *kubernetes.Clientset
+	Kube               *kubernetes.Clientset `validate:"required"`
 	Keys               *kms.KeyManagementClient
 	ImageAnnotator     *vision.ImageAnnotatorClient
 	ImageProductSearch *vision.ProductSearchClient
@@ -104,9 +104,9 @@ type Clients struct {
 type GCP struct {
 	ctx     context.Context `validate:"required"`
 	cfg     *Config         `validate:"required"`
-	hTTP    *http.Client    `validate:"required"`
-	clients *Clients
-	svcs    *Services
+	httP    *http.Client    `validate:"required"`
+	clients *Clients        `validate:"required"`
+	svcs    *Services       `validate:"required"`
 	err     *multierror.Error
 }
 
@@ -274,7 +274,7 @@ func New(ctx context.Context, cfg *Config) *GCP {
 	g := &GCP{
 		ctx:  ctx,
 		cfg:  cfg,
-		hTTP: cli,
+		httP: cli,
 		err:  multiErr,
 		svcs: &Services{
 			Container:    tain,
@@ -353,34 +353,22 @@ func (g *GCP) Error() error {
 
 // Configuration returns the config used to create the GCP instance
 func (g *GCP) Configuration() *Config {
-	if g.cfg == nil {
-		panic("configuration is uninitialized- use gcloud.New to initialize the GCP instance")
-	}
 	return g.cfg
 }
 
 // Services returns an authenticated GCP ServiceSet
 func (g *GCP) Services() *Services {
-	if g.svcs == nil {
-		panic("services are uninitialized- use WithServices to add the GCP service set")
-	}
 	return g.svcs
 }
 
 // Clients returns an authenticated GCP ClientSet
 func (g *GCP) Clients() *Clients {
-	if g.clients == nil {
-		panic("clients are uninitialized- use WithClients to add the GCP client set")
-	}
 	return g.clients
 }
 
 // HTTP returns a google default HTTP client
 func (g *GCP) HTTP() *http.Client {
-	if g.hTTP == nil {
-		panic("http client is uninitialized- use gcloud.New to initialize the GCP instance")
-	}
-	return g.hTTP
+	return g.httP
 }
 
 func appendErr(base error, toAppend ...error) *multierror.Error {
