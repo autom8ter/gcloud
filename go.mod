@@ -15,7 +15,7 @@ require (
 	golang.org/x/oauth2 v0.0.0-20190319182350-c85d3e98c914
 	google.golang.org/api v0.3.0
 	google.golang.org/genproto v0.0.0-20190401181712-f467c93bbac2 // indirect
-	googlemaps.github.io/maps v0.0.0-20190311183511-743053230cec
+	googlemaps.github.io/maps v0.0.0-20190311183511-743053230cec // indirect
 	k8s.io/api v0.0.0-20190313235455-40a48860b5ab // indirect
 	k8s.io/apimachinery v0.0.0-20190404173353-6a84e37a896d // indirect
 	k8s.io/client-go v2.0.0-alpha.0.0.20190313235726-6ee68ca5fd83+incompatible
