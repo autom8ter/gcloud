@@ -43,17 +43,20 @@ import (
 	"google.golang.org/api/slides/v1"
 	"google.golang.org/api/tasks/v1"
 	"google.golang.org/api/youtube/v3"
+	validate "gopkg.in/go-playground/validator.v9"
 	"k8s.io/client-go/kubernetes"
 	"net/http"
 )
 
+var valid = validate.New()
+
 // Config is used to create a new GCP instance
 type Config struct {
-	Project   string
-	Scopes    []string
+	Project   string   `validate:"required"`
+	Scopes    []string `validate:"required"`
 	InCluster bool
 	SpannerDB string
-	Options   []option.ClientOption
+	Options   []option.ClientOption `validate:"required"`
 }
 
 // GCP ServiceSet. Make sure to pass the necessary scopes in your config to successfully initialize services.
@@ -102,16 +105,23 @@ type Clients struct {
 
 // GCP holds Google Cloud Platform Clients and Services
 type GCP struct {
-	ctx     context.Context
-	cfg     *Config
-	hTTP    *http.Client
-	trce    *stackdriver.Exporter
+	ctx     context.Context       `validate:"required"`
+	cfg     *Config               `validate:"required"`
+	hTTP    *http.Client          `validate:"required"`
+	trce    *stackdriver.Exporter `validate:"required"`
 	clients *Clients
 	svcs    *Services
 }
 
 // New returns a new authenticated GCP instance from the provided context and config
 func New(ctx context.Context, cfg *Config) (*GCP, []error) {
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	err := valid.Struct(cfg)
+	if err != nil {
+		panic(err.Error())
+	}
 	var stack []error
 	cli, err := google.DefaultClient(ctx, cfg.Scopes...)
 	if err != nil {
@@ -125,12 +135,20 @@ func New(ctx context.Context, cfg *Config) (*GCP, []error) {
 		stack = append(stack, eRR(err, cfg))
 	}
 
-	return &GCP{
+	g := &GCP{
 		ctx:  ctx,
 		cfg:  cfg,
 		hTTP: cli,
 		trce: trc,
-	}, stack
+	}
+	err = valid.Struct(g)
+	if err != nil {
+		panic(err.Error())
+	}
+	if len(stack) != 0 {
+		return g, stack
+	}
+	return g, nil
 }
 
 // Close closes all clients
@@ -281,7 +299,11 @@ func (g *GCP) WithServices() []error {
 	if err != nil {
 		stack = append(stack, eRR(err, g.cfg))
 	}
-	return stack
+
+	if len(stack) != 0 {
+		return stack
+	}
+	return nil
 }
 
 // WithClients adds the GCP Clients to the GCP instance
@@ -352,7 +374,10 @@ func (g *GCP) WithClients() []error {
 	if err != nil {
 		stack = append(stack, eRR(err, g.cfg))
 	}
-	return stack
+	if len(stack) != 0 {
+		return stack
+	}
+	return nil
 }
 
 func eRR(err error, c *Config) error {

@@ -34,11 +34,11 @@ GCP ClientSet
 
 ```go
 type Config struct {
-	Project   string
-	Scopes    []string
+	Project   string   `validate:"required"`
+	Scopes    []string `validate:"required"`
 	InCluster bool
 	SpannerDB string
-	Options   []option.ClientOption
+	Options   []option.ClientOption `validate:"required"`
 }
 ```
 
@@ -56,7 +56,7 @@ GCP holds Google Cloud Platform Clients and Services
 #### func  New
 
 ```go
-func New(ctx context.Context, cfg *Config) (*GCP, error)
+func New(ctx context.Context, cfg *Config) (*GCP, []error)
 ```
 New returns a new authenticated GCP instance from the provided context and
 config
@@ -119,14 +119,14 @@ Trace returns a stackdriver exporter
 #### func (*GCP) WithClients
 
 ```go
-func (g *GCP) WithClients() error
+func (g *GCP) WithClients() []error
 ```
 WithClients adds the GCP Clients to the GCP instance
 
 #### func (*GCP) WithServices
 
 ```go
-func (g *GCP) WithServices() error
+func (g *GCP) WithServices() []error
 ```
 WithServices adds the GCP Services to the GCP instance
 
