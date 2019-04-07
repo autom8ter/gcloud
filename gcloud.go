@@ -383,6 +383,7 @@ func (g *GCP) WithClients() []error {
 func eRR(err error, c *Config) error {
 	return errors.Wrap(err, fmt.Sprintf("failed to create http client: %s", toPrettyJsonString(c)))
 }
+
 func toPrettyJsonString(obj interface{}) string {
 	output, _ := json.MarshalIndent(obj, "", "  ")
 	return fmt.Sprintf("%s", output)
