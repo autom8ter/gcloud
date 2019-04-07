@@ -16,6 +16,7 @@ import (
 	"cloud.google.com/go/vision/apiv1"
 	"context"
 	"contrib.go.opencensus.io/exporter/stackdriver"
+	"encoding/json"
 	"fmt"
 	"github.com/autom8ter/gcloud/clients"
 	"github.com/pkg/errors"
@@ -110,34 +111,26 @@ type GCP struct {
 }
 
 // New returns a new authenticated GCP instance from the provided context and config
-func New(ctx context.Context, cfg *Config) (*GCP, error) {
-	var err error
-	cli, newErr := google.DefaultClient(ctx, cfg.Scopes...)
-	if newErr != nil {
-		wrapErr(err, newErr, fmt.Sprintf("failed to create http client from scopes: %v", cfg.Scopes))
+func New(ctx context.Context, cfg *Config) (*GCP, []error) {
+	var stack []error
+	cli, err := google.DefaultClient(ctx, cfg.Scopes...)
+	if err != nil {
+		stack = append(stack, eRR(err, cfg))
 	}
-	trc, newErr := stackdriver.NewExporter(stackdriver.Options{
+	trc, err := stackdriver.NewExporter(stackdriver.Options{
 		MonitoringClientOptions: cfg.Options,
 		TraceClientOptions:      cfg.Options,
 	})
-	if newErr != nil {
-		wrapErr(err, newErr, "failed to create stackdriver trace client from options")
+	if err != nil {
+		stack = append(stack, eRR(err, cfg))
 	}
 
-	if err != nil {
-		return &GCP{
-			ctx:  ctx,
-			cfg:  cfg,
-			hTTP: cli,
-			trce: trc,
-		}, err
-	}
 	return &GCP{
 		ctx:  ctx,
 		cfg:  cfg,
 		hTTP: cli,
 		trce: trc,
-	}, nil
+	}, stack
 }
 
 // Close closes all clients
@@ -204,171 +197,168 @@ func (g *GCP) HTTP() *http.Client {
 	return g.hTTP
 }
 
-func wrapErr(err error, newErr error, msg string) {
-	err = errors.Wrap(newErr, msg)
-}
-
 // WithServices adds the GCP Services to the GCP instance
-func (g *GCP) WithServices() error {
+func (g *GCP) WithServices() []error {
+	var stack []error
 	var err error
-	var newErr error
-	g.svcs.Container, newErr = container.NewService(g.ctx, g.cfg.Options...)
-	if newErr != nil {
-		wrapErr(err, newErr, "failed to create container client")
+	g.svcs.Container, err = container.NewService(g.ctx, g.cfg.Options...)
+	if err != nil {
+		stack = append(stack, eRR(err, g.cfg))
 	}
-	g.svcs.HealthCare, newErr = healthcare.NewService(g.ctx, g.cfg.Options...)
-	if newErr != nil {
-		wrapErr(err, newErr, "failed to create healthcare client")
+	g.svcs.HealthCare, err = healthcare.NewService(g.ctx, g.cfg.Options...)
+	if err != nil {
+		stack = append(stack, eRR(err, g.cfg))
 	}
-	g.svcs.Calendar, newErr = calendar.New(g.hTTP)
-	if newErr != nil {
-		wrapErr(err, newErr, "failed to create calendar client")
+	g.svcs.Calendar, err = calendar.New(g.hTTP)
+	if err != nil {
+		stack = append(stack, eRR(err, g.cfg))
 	}
-	g.svcs.Blogger, newErr = blogger.New(g.hTTP)
-	if newErr != nil {
-		wrapErr(err, newErr, "failed to create blogger client")
+	g.svcs.Blogger, err = blogger.New(g.hTTP)
+	if err != nil {
+		stack = append(stack, eRR(err, g.cfg))
 	}
-	g.svcs.CustomSearch, newErr = customsearch.New(g.hTTP)
-	if newErr != nil {
-		wrapErr(err, newErr, "failed to create custom search client")
+	g.svcs.CustomSearch, err = customsearch.New(g.hTTP)
+	if err != nil {
+		stack = append(stack, eRR(err, g.cfg))
 	}
-	g.svcs.ClassRoom, newErr = class.New(g.hTTP)
-	if newErr != nil {
-		wrapErr(err, newErr, "failed to create classroom client")
+	g.svcs.ClassRoom, err = class.New(g.hTTP)
+	if err != nil {
+		stack = append(stack, eRR(err, g.cfg))
 	}
-	g.svcs.Content, newErr = content.New(g.hTTP)
-	if newErr != nil {
-		wrapErr(err, newErr, "failed to create content client")
+	g.svcs.Content, err = content.New(g.hTTP)
+	if err != nil {
+		stack = append(stack, eRR(err, g.cfg))
 	}
-	g.svcs.OSLogin, newErr = oslogin.New(g.hTTP)
-	if newErr != nil {
-		wrapErr(err, newErr, "failed to create os login client")
+	g.svcs.OSLogin, err = oslogin.New(g.hTTP)
+	if err != nil {
+		stack = append(stack, eRR(err, g.cfg))
 	}
-	g.svcs.People, newErr = people.New(g.hTTP)
-	if newErr != nil {
-		wrapErr(err, newErr, "failed to create people client")
+	g.svcs.People, err = people.New(g.hTTP)
+	if err != nil {
+		stack = append(stack, eRR(err, g.cfg))
 	}
-	g.svcs.Photos, newErr = photos.New(g.hTTP)
-	if newErr != nil {
-		wrapErr(err, newErr, "failed to create photos client")
+	g.svcs.Photos, err = photos.New(g.hTTP)
+	if err != nil {
+		stack = append(stack, eRR(err, g.cfg))
 	}
-	g.svcs.Predicion, newErr = prediction.New(g.hTTP)
-	if newErr != nil {
-		wrapErr(err, newErr, "failed to create prediction client")
+	g.svcs.Predicion, err = prediction.New(g.hTTP)
+	if err != nil {
+		stack = append(stack, eRR(err, g.cfg))
 	}
-	g.svcs.Redis, newErr = redis.New(g.hTTP)
-	if newErr != nil {
-		wrapErr(err, newErr, "failed to create redis client")
+	g.svcs.Redis, err = redis.New(g.hTTP)
+	if err != nil {
+		stack = append(stack, eRR(err, g.cfg))
 	}
-	g.svcs.Config, newErr = run.New(g.hTTP)
-	if newErr != nil {
-		wrapErr(err, newErr, "failed to create runtime client")
+	g.svcs.Config, err = run.New(g.hTTP)
+	if err != nil {
+		stack = append(stack, eRR(err, g.cfg))
 	}
-	g.svcs.Sheets, newErr = sheets.New(g.hTTP)
-	if newErr != nil {
-		wrapErr(err, newErr, "failed to create sheets client")
+	g.svcs.Sheets, err = sheets.New(g.hTTP)
+	if err != nil {
+		stack = append(stack, eRR(err, g.cfg))
 	}
-	g.svcs.Slides, newErr = slides.New(g.hTTP)
-	if newErr != nil {
-		wrapErr(err, newErr, "failed to create slides client")
+	g.svcs.Slides, err = slides.New(g.hTTP)
+	if err != nil {
+		stack = append(stack, eRR(err, g.cfg))
 	}
-	g.svcs.Tasks, newErr = tasks.New(g.hTTP)
-	if newErr != nil {
-		wrapErr(err, newErr, "failed to create tasks client")
+	g.svcs.Tasks, err = tasks.New(g.hTTP)
+	if err != nil {
+		stack = append(stack, eRR(err, g.cfg))
 	}
-	g.svcs.YoutTube, newErr = youtube.New(g.hTTP)
-	if newErr != nil {
-		wrapErr(err, newErr, "failed to create youtube client")
+	g.svcs.YoutTube, err = youtube.New(g.hTTP)
+	if err != nil {
+		stack = append(stack, eRR(err, g.cfg))
 	}
-	g.svcs.Docs, newErr = docs.NewService(g.ctx, g.cfg.Options...)
-	if newErr != nil {
-		wrapErr(err, newErr, "failed to create docs client")
+	g.svcs.Docs, err = docs.NewService(g.ctx, g.cfg.Options...)
+	if err != nil {
+		stack = append(stack, eRR(err, g.cfg))
 	}
-	g.svcs.Jobs, newErr = jobs.New(g.hTTP)
-	if newErr != nil {
-		wrapErr(err, newErr, "failed to create jobs client")
+	g.svcs.Jobs, err = jobs.New(g.hTTP)
+	if err != nil {
+		stack = append(stack, eRR(err, g.cfg))
 	}
-	g.svcs.Domains, newErr = plusdomains.New(g.hTTP)
-	if newErr != nil {
-		wrapErr(err, newErr, "failed to create domains client")
+	g.svcs.Domains, err = plusdomains.New(g.hTTP)
+	if err != nil {
+		stack = append(stack, eRR(err, g.cfg))
 	}
-	return err
+	return stack
 }
 
 // WithClients adds the GCP Clients to the GCP instance
-func (g *GCP) WithClients() error {
+func (g *GCP) WithClients() []error {
+	var stack []error
 	var err error
-	var newErr error
-	g.clients.PubSub, newErr = pubsub.NewClient(g.ctx, g.cfg.Project, g.cfg.Options...)
+	g.clients.PubSub, err = pubsub.NewClient(g.ctx, g.cfg.Project, g.cfg.Options...)
 	if err != nil {
-		wrapErr(err, newErr, "failed to create pubsub client")
+		stack = append(stack, eRR(err, g.cfg))
 	}
-	g.clients.IAM, newErr = iam.NewService(g.ctx, g.cfg.Options...)
+	g.clients.IAM, err = iam.NewService(g.ctx, g.cfg.Options...)
 	if err != nil {
-		wrapErr(err, newErr, "failed to create iam client")
+		stack = append(stack, eRR(err, g.cfg))
 	}
-	g.clients.Storage, newErr = storage.NewClient(g.ctx, g.cfg.Options...)
+	g.clients.Storage, err = storage.NewClient(g.ctx, g.cfg.Options...)
 	if err != nil {
-		wrapErr(err, newErr, "failed to create storage client")
+		stack = append(stack, eRR(err, g.cfg))
 	}
-	g.clients.Spanner, newErr = spanner.NewClient(g.ctx, g.cfg.SpannerDB, g.cfg.Options...)
+	g.clients.Spanner, err = spanner.NewClient(g.ctx, g.cfg.SpannerDB, g.cfg.Options...)
 	if err != nil {
-		wrapErr(err, newErr, "failed to create spanner client")
+		stack = append(stack, eRR(err, g.cfg))
 	}
-	g.clients.DBAdmin, newErr = database.NewDatabaseAdminClient(g.ctx, g.cfg.Options...)
+	g.clients.DBAdmin, err = database.NewDatabaseAdminClient(g.ctx, g.cfg.Options...)
 	if err != nil {
-		wrapErr(err, newErr, "failed to create database admin client")
+		stack = append(stack, eRR(err, g.cfg))
 	}
-	g.clients.FireStore, newErr = firestore.NewClient(g.ctx, g.cfg.Project, g.cfg.Options...)
-	if newErr != nil {
-		wrapErr(err, newErr, "failed to create database admin client")
+	g.clients.FireStore, err = firestore.NewClient(g.ctx, g.cfg.Project, g.cfg.Options...)
+	if err != nil {
+		stack = append(stack, eRR(err, g.cfg))
 	}
-
-	if newErr != nil {
-		wrapErr(err, newErr, "failed to create stackdriver trace client")
+	g.clients.IOT, err = iot.NewDeviceManagerClient(g.ctx, g.cfg.Options...)
+	if err != nil {
+		stack = append(stack, eRR(err, g.cfg))
 	}
-	g.clients.IOT, newErr = iot.NewDeviceManagerClient(g.ctx, g.cfg.Options...)
-	if newErr != nil {
-		wrapErr(err, newErr, "failed to create iot device manager client")
+	g.clients.Kube, err = clients.NewKubernetesClientSet(g.cfg.InCluster)
+	if err != nil {
+		stack = append(stack, eRR(err, g.cfg))
 	}
-	g.clients.Kube, newErr = clients.NewKubernetesClientSet(g.cfg.InCluster)
-	if newErr != nil {
-		wrapErr(err, newErr, "failed to create kubernetes client")
+	g.clients.Keys, err = kms.NewKeyManagementClient(g.ctx, g.cfg.Options...)
+	if err != nil {
+		stack = append(stack, eRR(err, g.cfg))
 	}
-	g.clients.Keys, newErr = kms.NewKeyManagementClient(g.ctx, g.cfg.Options...)
-	if newErr != nil {
-		wrapErr(err, newErr, "failed to create key management client")
+	g.clients.ImageAnnotator, err = vision.NewImageAnnotatorClient(g.ctx, g.cfg.Options...)
+	if err != nil {
+		stack = append(stack, eRR(err, g.cfg))
 	}
-	g.clients.ImageAnnotator, newErr = vision.NewImageAnnotatorClient(g.ctx, g.cfg.Options...)
-	if newErr != nil {
-		wrapErr(err, newErr, "failed to create key management client")
-	}
-	g.clients.ImageProductSearch, newErr = vision.NewProductSearchClient(g.ctx, g.cfg.Options...)
-	if newErr != nil {
-		wrapErr(err, newErr, "failed to create key management client")
-
+	g.clients.ImageProductSearch, err = vision.NewProductSearchClient(g.ctx, g.cfg.Options...)
+	if err != nil {
+		stack = append(stack, eRR(err, g.cfg))
 	}
 	g.clients.VideoIntelligence, err = videointelligence.NewClient(g.ctx, g.cfg.Options...)
-	if newErr != nil {
-		wrapErr(err, newErr, "failed to create video intelligence client")
-
+	if err != nil {
+		stack = append(stack, eRR(err, g.cfg))
 	}
 	g.clients.Text2Speech, err = texttospeech.NewClient(g.ctx, g.cfg.Options...)
-	if newErr != nil {
-		wrapErr(err, newErr, "failed to create text2speech client")
+	if err != nil {
+		stack = append(stack, eRR(err, g.cfg))
 	}
-	g.clients.Speech, newErr = speech.NewClient(g.ctx, g.cfg.Options...)
-	if newErr != nil {
-		wrapErr(err, newErr, "failed to create speech client")
+	g.clients.Speech, err = speech.NewClient(g.ctx, g.cfg.Options...)
+	if err != nil {
+		stack = append(stack, eRR(err, g.cfg))
 	}
-	g.clients.Translate, newErr = translate.NewClient(g.ctx, g.cfg.Options...)
-	if newErr != nil {
-		wrapErr(err, newErr, "failed to create translation client")
+	g.clients.Translate, err = translate.NewClient(g.ctx, g.cfg.Options...)
+	if err != nil {
+		stack = append(stack, eRR(err, g.cfg))
 	}
+	g.clients.Language, err = language.NewClient(g.ctx, g.cfg.Options...)
+	if err != nil {
+		stack = append(stack, eRR(err, g.cfg))
+	}
+	return stack
+}
 
-	g.clients.Language, newErr = language.NewClient(g.ctx, g.cfg.Options...)
-	if newErr != nil {
-		wrapErr(err, newErr, "failed to create language client")
-	}
-	return err
+func eRR(err error, c *Config) error {
+	return errors.Wrap(err, fmt.Sprintf("failed to create http client: %s", toPrettyJsonString(c)))
+}
+func toPrettyJsonString(obj interface{}) string {
+	output, _ := json.MarshalIndent(obj, "", "  ")
+	return fmt.Sprintf("%s", output)
 }
