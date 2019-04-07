@@ -109,8 +109,6 @@ type GCP struct {
 	svcs    *Services
 }
 
-type HandlerFunc func(*GCP) error
-
 // New returns a new authenticated GCP instance from the provided context and config
 func New(ctx context.Context, cfg *Config) (*GCP, error) {
 	var err error
@@ -373,14 +371,4 @@ func (g *GCP) WithClients() error {
 		wrapErr(err, newErr, "failed to create language client")
 	}
 	return err
-}
-
-func (g *GCP) Execute(fns ...HandlerFunc) error {
-	for _, fn := range fns {
-		err := fn(g)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
 }
