@@ -16,10 +16,8 @@ import (
 	"cloud.google.com/go/vision/apiv1"
 	"context"
 	"contrib.go.opencensus.io/exporter/stackdriver"
-	"encoding/json"
-	"fmt"
 	"github.com/autom8ter/gcloud/clients"
-	"github.com/pkg/errors"
+	"github.com/hashicorp/go-multierror"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/blogger/v3"
 	"google.golang.org/api/calendar/v3"
@@ -111,30 +109,31 @@ type GCP struct {
 	trce    *stackdriver.Exporter `validate:"required"`
 	clients *Clients
 	svcs    *Services
+	err     *multierror.Error
 }
 
 // New returns a new authenticated GCP instance from the provided context and config
-func New(ctx context.Context, cfg *Config) (*GCP, []error) {
+func New(ctx context.Context, cfg *Config) *GCP {
+	var errs []error
 	if ctx == nil {
 		ctx = context.Background()
 	}
 	err := valid.Struct(cfg)
 	if err != nil {
-		panic(err.Error())
+		panic("validation error: " + err.Error())
 	}
-	var stack []error
 	cli, err := google.DefaultClient(ctx, cfg.Scopes...)
 	if err != nil {
-		stack = append(stack, eRR(err, cfg))
+		errs = append(errs, err)
 	}
+
 	trc, err := stackdriver.NewExporter(stackdriver.Options{
 		MonitoringClientOptions: cfg.Options,
 		TraceClientOptions:      cfg.Options,
 	})
 	if err != nil {
-		stack = append(stack, eRR(err, cfg))
+		errs = append(errs, err)
 	}
-
 	g := &GCP{
 		ctx:  ctx,
 		cfg:  cfg,
@@ -143,12 +142,157 @@ func New(ctx context.Context, cfg *Config) (*GCP, []error) {
 	}
 	err = valid.Struct(g)
 	if err != nil {
-		panic(err.Error())
+		panic("validation error: " + err.Error())
 	}
-	if len(stack) != 0 {
-		return g, stack
+
+	g.clients.PubSub, err = pubsub.NewClient(g.ctx, g.cfg.Project, g.cfg.Options...)
+	if err != nil {
+		errs = append(errs, err)
 	}
-	return g, nil
+	g.clients.IAM, err = iam.NewService(g.ctx, g.cfg.Options...)
+	if err != nil {
+		errs = append(errs, err)
+	}
+	g.clients.Storage, err = storage.NewClient(g.ctx, g.cfg.Options...)
+	if err != nil {
+		errs = append(errs, err)
+	}
+	g.clients.Spanner, err = spanner.NewClient(g.ctx, g.cfg.SpannerDB, g.cfg.Options...)
+	if err != nil {
+		errs = append(errs, err)
+	}
+	g.clients.DBAdmin, err = database.NewDatabaseAdminClient(g.ctx, g.cfg.Options...)
+	if err != nil {
+		errs = append(errs, err)
+	}
+	g.clients.FireStore, err = firestore.NewClient(g.ctx, g.cfg.Project, g.cfg.Options...)
+	if err != nil {
+		errs = append(errs, err)
+	}
+	g.clients.IOT, err = iot.NewDeviceManagerClient(g.ctx, g.cfg.Options...)
+	if err != nil {
+		errs = append(errs, err)
+	}
+	g.clients.Kube, err = clients.NewKubernetesClientSet(g.cfg.InCluster)
+	if err != nil {
+		errs = append(errs, err)
+	}
+	g.clients.Keys, err = kms.NewKeyManagementClient(g.ctx, g.cfg.Options...)
+	if err != nil {
+		errs = append(errs, err)
+	}
+	g.clients.ImageAnnotator, err = vision.NewImageAnnotatorClient(g.ctx, g.cfg.Options...)
+	if err != nil {
+		errs = append(errs, err)
+	}
+	g.clients.ImageProductSearch, err = vision.NewProductSearchClient(g.ctx, g.cfg.Options...)
+	if err != nil {
+		errs = append(errs, err)
+	}
+	g.clients.VideoIntelligence, err = videointelligence.NewClient(g.ctx, g.cfg.Options...)
+	if err != nil {
+		errs = append(errs, err)
+	}
+	g.clients.Text2Speech, err = texttospeech.NewClient(g.ctx, g.cfg.Options...)
+	if err != nil {
+		errs = append(errs, err)
+	}
+	g.clients.Speech, err = speech.NewClient(g.ctx, g.cfg.Options...)
+	if err != nil {
+		errs = append(errs, err)
+	}
+	g.clients.Translate, err = translate.NewClient(g.ctx, g.cfg.Options...)
+	if err != nil {
+		errs = append(errs, err)
+	}
+	g.clients.Language, err = language.NewClient(g.ctx, g.cfg.Options...)
+	if err != nil {
+		errs = append(errs, err)
+	}
+
+	g.svcs.Container, err = container.NewService(g.ctx, g.cfg.Options...)
+	if err != nil {
+		errs = append(errs, err)
+	}
+	g.svcs.HealthCare, err = healthcare.NewService(g.ctx, g.cfg.Options...)
+	if err != nil {
+		errs = append(errs, err)
+	}
+	g.svcs.Calendar, err = calendar.NewService(g.ctx, g.cfg.Options...)
+	if err != nil {
+		errs = append(errs, err)
+	}
+	g.svcs.Blogger, err = blogger.NewService(g.ctx, g.cfg.Options...)
+	if err != nil {
+		errs = append(errs, err)
+	}
+	g.svcs.CustomSearch, err = customsearch.NewService(g.ctx, g.cfg.Options...)
+	if err != nil {
+		errs = append(errs, err)
+	}
+	g.svcs.ClassRoom, err = class.NewService(g.ctx, g.cfg.Options...)
+	if err != nil {
+		errs = append(errs, err)
+	}
+	g.svcs.Content, err = content.NewService(g.ctx, g.cfg.Options...)
+	if err != nil {
+		errs = append(errs, err)
+	}
+	g.svcs.OSLogin, err = oslogin.NewService(g.ctx, g.cfg.Options...)
+	if err != nil {
+		errs = append(errs, err)
+	}
+	g.svcs.People, err = people.NewService(g.ctx, g.cfg.Options...)
+	if err != nil {
+		errs = append(errs, err)
+	}
+	g.svcs.Photos, err = photos.New(g.hTTP)
+	if err != nil {
+		errs = append(errs, err)
+	}
+	g.svcs.Predicion, err = prediction.New(g.hTTP)
+	if err != nil {
+		errs = append(errs, err)
+	}
+	g.svcs.Redis, err = redis.NewService(g.ctx, g.cfg.Options...)
+	if err != nil {
+		errs = append(errs, err)
+	}
+	g.svcs.Config, err = run.NewService(g.ctx, g.cfg.Options...)
+	if err != nil {
+		errs = append(errs, err)
+	}
+	g.svcs.Sheets, err = sheets.NewService(g.ctx, g.cfg.Options...)
+	if err != nil {
+		errs = append(errs, err)
+	}
+	g.svcs.Slides, err = slides.NewService(g.ctx, g.cfg.Options...)
+	if err != nil {
+		errs = append(errs, err)
+	}
+	g.svcs.Tasks, err = tasks.NewService(g.ctx, g.cfg.Options...)
+	if err != nil {
+		errs = append(errs, err)
+	}
+	g.svcs.YoutTube, err = youtube.NewService(g.ctx, g.cfg.Options...)
+	if err != nil {
+		errs = append(errs, err)
+	}
+	g.svcs.Docs, err = docs.NewService(g.ctx, g.cfg.Options...)
+	if err != nil {
+		errs = append(errs, err)
+	}
+	g.svcs.Jobs, err = jobs.NewService(g.ctx, g.cfg.Options...)
+	if err != nil {
+		errs = append(errs, err)
+	}
+	g.svcs.Domains, err = plusdomains.NewService(g.ctx, g.cfg.Options...)
+	if err != nil {
+		errs = append(errs, err)
+	}
+	g.err = appendErr(errs[0], errs[1:]...)
+
+	return g
 }
 
 // Close closes all clients
@@ -173,6 +317,10 @@ func (g *GCP) FromContext(key interface{}) interface{} {
 
 func (g *GCP) Context() context.Context {
 	return g.ctx
+}
+
+func (g *GCP) Error() error {
+	return g.err.ErrorOrNil()
 }
 
 // Configuration returns the config used to create the GCP instance
@@ -215,176 +363,6 @@ func (g *GCP) HTTP() *http.Client {
 	return g.hTTP
 }
 
-// WithServices adds the GCP Services to the GCP instance
-func (g *GCP) WithServices() []error {
-	var stack []error
-	var err error
-	g.svcs.Container, err = container.NewService(g.ctx, g.cfg.Options...)
-	if err != nil {
-		stack = append(stack, eRR(err, g.cfg))
-	}
-	g.svcs.HealthCare, err = healthcare.NewService(g.ctx, g.cfg.Options...)
-	if err != nil {
-		stack = append(stack, eRR(err, g.cfg))
-	}
-	g.svcs.Calendar, err = calendar.New(g.hTTP)
-	if err != nil {
-		stack = append(stack, eRR(err, g.cfg))
-	}
-	g.svcs.Blogger, err = blogger.New(g.hTTP)
-	if err != nil {
-		stack = append(stack, eRR(err, g.cfg))
-	}
-	g.svcs.CustomSearch, err = customsearch.New(g.hTTP)
-	if err != nil {
-		stack = append(stack, eRR(err, g.cfg))
-	}
-	g.svcs.ClassRoom, err = class.New(g.hTTP)
-	if err != nil {
-		stack = append(stack, eRR(err, g.cfg))
-	}
-	g.svcs.Content, err = content.New(g.hTTP)
-	if err != nil {
-		stack = append(stack, eRR(err, g.cfg))
-	}
-	g.svcs.OSLogin, err = oslogin.New(g.hTTP)
-	if err != nil {
-		stack = append(stack, eRR(err, g.cfg))
-	}
-	g.svcs.People, err = people.New(g.hTTP)
-	if err != nil {
-		stack = append(stack, eRR(err, g.cfg))
-	}
-	g.svcs.Photos, err = photos.New(g.hTTP)
-	if err != nil {
-		stack = append(stack, eRR(err, g.cfg))
-	}
-	g.svcs.Predicion, err = prediction.New(g.hTTP)
-	if err != nil {
-		stack = append(stack, eRR(err, g.cfg))
-	}
-	g.svcs.Redis, err = redis.New(g.hTTP)
-	if err != nil {
-		stack = append(stack, eRR(err, g.cfg))
-	}
-	g.svcs.Config, err = run.New(g.hTTP)
-	if err != nil {
-		stack = append(stack, eRR(err, g.cfg))
-	}
-	g.svcs.Sheets, err = sheets.New(g.hTTP)
-	if err != nil {
-		stack = append(stack, eRR(err, g.cfg))
-	}
-	g.svcs.Slides, err = slides.New(g.hTTP)
-	if err != nil {
-		stack = append(stack, eRR(err, g.cfg))
-	}
-	g.svcs.Tasks, err = tasks.New(g.hTTP)
-	if err != nil {
-		stack = append(stack, eRR(err, g.cfg))
-	}
-	g.svcs.YoutTube, err = youtube.New(g.hTTP)
-	if err != nil {
-		stack = append(stack, eRR(err, g.cfg))
-	}
-	g.svcs.Docs, err = docs.NewService(g.ctx, g.cfg.Options...)
-	if err != nil {
-		stack = append(stack, eRR(err, g.cfg))
-	}
-	g.svcs.Jobs, err = jobs.New(g.hTTP)
-	if err != nil {
-		stack = append(stack, eRR(err, g.cfg))
-	}
-	g.svcs.Domains, err = plusdomains.New(g.hTTP)
-	if err != nil {
-		stack = append(stack, eRR(err, g.cfg))
-	}
-
-	if len(stack) != 0 {
-		return stack
-	}
-	return nil
-}
-
-// WithClients adds the GCP Clients to the GCP instance
-func (g *GCP) WithClients() []error {
-	var stack []error
-	var err error
-	g.clients.PubSub, err = pubsub.NewClient(g.ctx, g.cfg.Project, g.cfg.Options...)
-	if err != nil {
-		stack = append(stack, eRR(err, g.cfg))
-	}
-	g.clients.IAM, err = iam.NewService(g.ctx, g.cfg.Options...)
-	if err != nil {
-		stack = append(stack, eRR(err, g.cfg))
-	}
-	g.clients.Storage, err = storage.NewClient(g.ctx, g.cfg.Options...)
-	if err != nil {
-		stack = append(stack, eRR(err, g.cfg))
-	}
-	g.clients.Spanner, err = spanner.NewClient(g.ctx, g.cfg.SpannerDB, g.cfg.Options...)
-	if err != nil {
-		stack = append(stack, eRR(err, g.cfg))
-	}
-	g.clients.DBAdmin, err = database.NewDatabaseAdminClient(g.ctx, g.cfg.Options...)
-	if err != nil {
-		stack = append(stack, eRR(err, g.cfg))
-	}
-	g.clients.FireStore, err = firestore.NewClient(g.ctx, g.cfg.Project, g.cfg.Options...)
-	if err != nil {
-		stack = append(stack, eRR(err, g.cfg))
-	}
-	g.clients.IOT, err = iot.NewDeviceManagerClient(g.ctx, g.cfg.Options...)
-	if err != nil {
-		stack = append(stack, eRR(err, g.cfg))
-	}
-	g.clients.Kube, err = clients.NewKubernetesClientSet(g.cfg.InCluster)
-	if err != nil {
-		stack = append(stack, eRR(err, g.cfg))
-	}
-	g.clients.Keys, err = kms.NewKeyManagementClient(g.ctx, g.cfg.Options...)
-	if err != nil {
-		stack = append(stack, eRR(err, g.cfg))
-	}
-	g.clients.ImageAnnotator, err = vision.NewImageAnnotatorClient(g.ctx, g.cfg.Options...)
-	if err != nil {
-		stack = append(stack, eRR(err, g.cfg))
-	}
-	g.clients.ImageProductSearch, err = vision.NewProductSearchClient(g.ctx, g.cfg.Options...)
-	if err != nil {
-		stack = append(stack, eRR(err, g.cfg))
-	}
-	g.clients.VideoIntelligence, err = videointelligence.NewClient(g.ctx, g.cfg.Options...)
-	if err != nil {
-		stack = append(stack, eRR(err, g.cfg))
-	}
-	g.clients.Text2Speech, err = texttospeech.NewClient(g.ctx, g.cfg.Options...)
-	if err != nil {
-		stack = append(stack, eRR(err, g.cfg))
-	}
-	g.clients.Speech, err = speech.NewClient(g.ctx, g.cfg.Options...)
-	if err != nil {
-		stack = append(stack, eRR(err, g.cfg))
-	}
-	g.clients.Translate, err = translate.NewClient(g.ctx, g.cfg.Options...)
-	if err != nil {
-		stack = append(stack, eRR(err, g.cfg))
-	}
-	g.clients.Language, err = language.NewClient(g.ctx, g.cfg.Options...)
-	if err != nil {
-		stack = append(stack, eRR(err, g.cfg))
-	}
-	if len(stack) != 0 {
-		return stack
-	}
-	return nil
-}
-
-func eRR(err error, c *Config) error {
-	return errors.Wrap(err, fmt.Sprintf("failed to create http client: %s", toPrettyJsonString(c)))
-}
-
-func toPrettyJsonString(obj interface{}) string {
-	output, _ := json.MarshalIndent(obj, "", "  ")
-	return fmt.Sprintf("%s", output)
+func appendErr(base error, toAppend ...error) *multierror.Error {
+	return multierror.Append(base, toAppend...)
 }
