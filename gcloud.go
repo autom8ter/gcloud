@@ -15,7 +15,6 @@ import (
 	"cloud.google.com/go/videointelligence/apiv1"
 	"cloud.google.com/go/vision/apiv1"
 	"context"
-	"contrib.go.opencensus.io/exporter/stackdriver"
 	"github.com/autom8ter/gcloud/clients"
 	"github.com/autom8ter/objectify"
 	"github.com/hashicorp/go-multierror"
@@ -122,14 +121,6 @@ func New(ctx context.Context, cfg *Config) *GCP {
 		panic("validation error: " + err.Error())
 	}
 	cli, err := google.DefaultClient(ctx, cfg.Scopes...)
-	if err != nil {
-		errs = append(errs, err)
-	}
-
-	trc, err := stackdriver.NewExporter(stackdriver.Options{
-		MonitoringClientOptions: cfg.Options,
-		TraceClientOptions:      cfg.Options,
-	})
 	if err != nil {
 		errs = append(errs, err)
 	}
