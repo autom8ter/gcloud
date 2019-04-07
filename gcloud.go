@@ -4,6 +4,7 @@ import (
 	"cloud.google.com/go/firestore"
 	"cloud.google.com/go/iot/apiv1"
 	"cloud.google.com/go/kms/apiv1"
+	"cloud.google.com/go/language/apiv1"
 	"cloud.google.com/go/pubsub"
 	"cloud.google.com/go/spanner"
 	"cloud.google.com/go/spanner/admin/database/apiv1"
@@ -44,6 +45,7 @@ type GCP struct {
 	Speech             *speech.Client
 	Text2Speech        *texttospeech.Client
 	Translate          *translate.Client
+	Language           *language.Client
 }
 
 // New returns a new authenticated GCP instance from the provided api options GCLOUD_PROJECTID, GCLOUD_SPANNERDB,
@@ -110,11 +112,16 @@ func New(ctx context.Context, opts ...option.ClientOption) (*GCP, error) {
 	if newErr != nil {
 		wrapErr(err, newErr, "failed to create text2speech client from options")
 	}
-	spch, err := speech.NewClient(ctx, opts...)
+	spch, newErr := speech.NewClient(ctx, opts...)
 	if newErr != nil {
 		wrapErr(err, newErr, "failed to create speech client from options")
 	}
-	tr, err := translate.NewClient(ctx, opts...)
+	tr, newErr := translate.NewClient(ctx, opts...)
+	if newErr != nil {
+		wrapErr(err, newErr, "failed to create translation client from options")
+	}
+
+	lang, newErr := language.NewClient(ctx)
 	if newErr != nil {
 		wrapErr(err, newErr, "failed to create translation client from options")
 	}
@@ -136,6 +143,7 @@ func New(ctx context.Context, opts ...option.ClientOption) (*GCP, error) {
 			Speech:             spch,
 			Text2Speech:        t2p,
 			Translate:          tr,
+			Language:           lang,
 		}, err
 	}
 	return &GCP{
@@ -155,21 +163,22 @@ func New(ctx context.Context, opts ...option.ClientOption) (*GCP, error) {
 		Speech:             spch,
 		Text2Speech:        t2p,
 		Translate:          tr,
+		Language:           lang,
 	}, nil
 }
 
 // Close closes all clients
 func (g *GCP) Close() {
-	g.PubSub.Close()
-	g.Storage.Close()
-	g.DBAdmin.Close()
-	g.Speech.Close()
-	g.FireStore.Close()
-	g.Text2Speech.Close()
-	g.ImageProductSearch.Close()
-	g.Translate.Close()
-	g.Keys.Close()
-	g.VideoIntelligence.Close()
+	_ = g.PubSub.Close()
+	_ = g.Storage.Close()
+	_ = g.DBAdmin.Close()
+	_ = g.Speech.Close()
+	_ = g.FireStore.Close()
+	_ = g.Text2Speech.Close()
+	_ = g.ImageProductSearch.Close()
+	_ = g.Translate.Close()
+	_ = g.Keys.Close()
+	_ = g.VideoIntelligence.Close()
 	g.Trace.Flush()
 }
 
