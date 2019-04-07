@@ -87,7 +87,13 @@ Configuration returns the config used to create the GCP instance
 ```go
 func (g *GCP) Context() context.Context
 ```
-Context returns the context used to create the GCP instance
+
+#### func (*GCP) FromContext
+
+```go
+func (g *GCP) FromContext(key interface{}) interface{}
+```
+FromContext returns the value the context is holding from the given key
 
 #### func (*GCP) HTTP
 
@@ -109,6 +115,20 @@ Services returns an authenticated GCP ServiceSet
 func (g *GCP) Trace() *stackdriver.Exporter
 ```
 Trace returns a stackdriver exporter
+
+#### func (*GCP) WithClients
+
+```go
+func (g *GCP) WithClients() error
+```
+WithClients adds the GCP Clients to the GCP instance
+
+#### func (*GCP) WithServices
+
+```go
+func (g *GCP) WithServices() error
+```
+WithServices adds the GCP Services to the GCP instance
 
 #### type Services
 
@@ -133,6 +153,7 @@ type Services struct {
 	YoutTube     *youtube.Service
 	Docs         *docs.Service
 	Jobs         *jobs.Service
+	Domains      *plusdomains.Service
 }
 ```
 
