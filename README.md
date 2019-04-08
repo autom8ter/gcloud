@@ -9,8 +9,6 @@
 
 ```go
 type GCP struct {
-	Project string                `validate:"required"`
-	Scopes  []string              `validate:"required"`
 	Options []option.ClientOption `validate:"required"`
 }
 ```
@@ -21,7 +19,7 @@ validate GCP before using it.
 #### func  NewGCP
 
 ```go
-func NewGCP(project string, scopes []string, options ...option.ClientOption) *GCP
+func NewGCP(options ...option.ClientOption) *GCP
 ```
 
 #### func (*GCP) Blogger
@@ -81,13 +79,13 @@ func (g *GCP) Domains(ctx context.Context) (*plusdomains.Service, error)
 #### func (*GCP) Firestore
 
 ```go
-func (g *GCP) Firestore(ctx context.Context) (*firestore.Client, error)
+func (g *GCP) Firestore(ctx context.Context, project string) (*firestore.Client, error)
 ```
 
 #### func (*GCP) HTTP
 
 ```go
-func (g *GCP) HTTP(ctx context.Context) (*http.Client, error)
+func (g *GCP) HTTP(ctx context.Context, scopes []string) (*http.Client, error)
 ```
 
 #### func (*GCP) HealthCare
@@ -177,7 +175,7 @@ func (g *GCP) Prediction(cli *http.Client) (*prediction.Service, error)
 #### func (*GCP) PubSub
 
 ```go
-func (g *GCP) PubSub(ctx context.Context) (*pubsub.Client, error)
+func (g *GCP) PubSub(ctx context.Context, project string) (*pubsub.Client, error)
 ```
 
 #### func (*GCP) Redis

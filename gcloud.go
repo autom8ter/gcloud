@@ -47,29 +47,30 @@ var tool = objectify.New()
 
 // GCP is the configuration used to return gcp clients and services. Use Init() to validate GCP before using it.
 type GCP struct {
-	Project string                `validate:"required"`
-	Scopes  []string              `validate:"required"`
 	Options []option.ClientOption `validate:"required"`
 }
 
-func NewGCP(project string, scopes []string, options ...option.ClientOption) *GCP {
-	return &GCP{Project: project, Scopes: scopes, Options: options}
+func NewGCP(options ...option.ClientOption) *GCP {
+	if len(options) < 1 {
+		panic("please provide at least one client option. ref: google.golang.org/api/option")
+	}
+	return &GCP{Options: options}
 }
 
 func (g *GCP) Init() error {
 	return tool.Validate(g)
 }
 
-func (g *GCP) HTTP(ctx context.Context) (*http.Client, error) {
-	return google.DefaultClient(ctx, g.Scopes...)
+func (g *GCP) HTTP(ctx context.Context, scopes []string) (*http.Client, error) {
+	return google.DefaultClient(ctx, scopes...)
 }
 
-func (g *GCP) PubSub(ctx context.Context) (*pubsub.Client, error) {
-	return pubsub.NewClient(ctx, g.Project, g.Options...)
+func (g *GCP) PubSub(ctx context.Context, project string) (*pubsub.Client, error) {
+	return pubsub.NewClient(ctx, project, g.Options...)
 }
 
-func (g *GCP) Firestore(ctx context.Context) (*firestore.Client, error) {
-	return firestore.NewClient(ctx, g.Project, g.Options...)
+func (g *GCP) Firestore(ctx context.Context, project string) (*firestore.Client, error) {
+	return firestore.NewClient(ctx, project, g.Options...)
 }
 
 func (g *GCP) Translate(ctx context.Context) (*translate.Client, error) {
