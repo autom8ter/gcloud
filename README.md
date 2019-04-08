@@ -5,157 +5,249 @@
 
 ## Usage
 
-#### type Clients
-
-```go
-type Clients struct {
-	PubSub             *pubsub.Client
-	IAM                *iam.Service
-	Storage            *storage.Client
-	Spanner            *spanner.Client
-	DBAdmin            *database.DatabaseAdminClient
-	FireStore          *firestore.Client
-	IOT                *iot.DeviceManagerClient
-	Kube               *kubernetes.Clientset
-	Keys               *kms.KeyManagementClient
-	ImageAnnotator     *vision.ImageAnnotatorClient
-	ImageProductSearch *vision.ProductSearchClient
-	VideoIntelligence  *videointelligence.Client
-	Speech             *speech.Client
-	Text2Speech        *texttospeech.Client
-	Translate          *translate.Client
-	Language           *language.Client
-}
-```
-
-GCP ClientSet
-
-#### type Config
-
-```go
-type Config struct {
-	Project   string   `validate:"required"`
-	Scopes    []string `validate:"required"`
-	InCluster bool
-	SpannerDB string
-	Options   []option.ClientOption `validate:"required"`
-}
-```
-
-Config is used to create a new GCP instance
-
 #### type GCP
 
 ```go
 type GCP struct {
+	Project string                `validate:"required"`
+	Scopes  []string              `validate:"required"`
+	Options []option.ClientOption `validate:"required"`
 }
 ```
 
-GCP holds Google Cloud Platform Clients and Services
+GCP is the configuration used to return gcp clients and services. Use Init() to
+validate GCP before using it.
 
-#### func  New
-
-```go
-func New(ctx context.Context, cfg *Config) (*GCP, []error)
-```
-New returns a new authenticated GCP instance from the provided context and
-config
-
-#### func (*GCP) Clients
+#### func  NewGCP
 
 ```go
-func (g *GCP) Clients() *Clients
+func NewGCP(project string, scopes []string, options ...option.ClientOption) *GCP
 ```
-Clients returns an authenticated GCP ClientSet
 
-#### func (*GCP) Close
+#### func (*GCP) Blogger
 
 ```go
-func (g *GCP) Close()
+func (g *GCP) Blogger(ctx context.Context) (*blogger.Service, error)
 ```
-Close closes all clients
 
-#### func (*GCP) Configuration
+#### func (*GCP) Calendar
 
 ```go
-func (g *GCP) Configuration() *Config
+func (g *GCP) Calendar(ctx context.Context) (*healthcare.Service, error)
 ```
-Configuration returns the config used to create the GCP instance
 
-#### func (*GCP) Context
+#### func (*GCP) ClassRoom
 
 ```go
-func (g *GCP) Context() context.Context
+func (g *GCP) ClassRoom(ctx context.Context) (*class.Service, error)
 ```
 
-#### func (*GCP) FromContext
+#### func (*GCP) Container
 
 ```go
-func (g *GCP) FromContext(key interface{}) interface{}
+func (g *GCP) Container(ctx context.Context) (*container.Service, error)
 ```
-FromContext returns the value the context is holding from the given key
+
+#### func (*GCP) Content
+
+```go
+func (g *GCP) Content(ctx context.Context) (*content.APIService, error)
+```
+
+#### func (*GCP) CustomSearch
+
+```go
+func (g *GCP) CustomSearch(ctx context.Context) (*customsearch.Service, error)
+```
+
+#### func (*GCP) DBAdmin
+
+```go
+func (g *GCP) DBAdmin(ctx context.Context) (*database.DatabaseAdminClient, error)
+```
+
+#### func (*GCP) Docs
+
+```go
+func (g *GCP) Docs(ctx context.Context) (*docs.Service, error)
+```
+
+#### func (*GCP) Domains
+
+```go
+func (g *GCP) Domains(ctx context.Context) (*plusdomains.Service, error)
+```
+
+#### func (*GCP) Firestore
+
+```go
+func (g *GCP) Firestore(ctx context.Context) (*firestore.Client, error)
+```
 
 #### func (*GCP) HTTP
 
 ```go
-func (g *GCP) HTTP() *http.Client
+func (g *GCP) HTTP(ctx context.Context) (*http.Client, error)
 ```
-HTTP returns a google default HTTP client
 
-#### func (*GCP) Services
+#### func (*GCP) HealthCare
 
 ```go
-func (g *GCP) Services() *Services
+func (g *GCP) HealthCare(ctx context.Context) (*healthcare.Service, error)
 ```
-Services returns an authenticated GCP ServiceSet
 
-#### func (*GCP) Trace
+#### func (*GCP) IAM
 
 ```go
-func (g *GCP) Trace() *stackdriver.Exporter
+func (g *GCP) IAM(ctx context.Context) (*iam.Service, error)
 ```
-Trace returns a stackdriver exporter
 
-#### func (*GCP) WithClients
+#### func (*GCP) IOT
 
 ```go
-func (g *GCP) WithClients() []error
+func (g *GCP) IOT(ctx context.Context) (*iot.DeviceManagerClient, error)
 ```
-WithClients adds the GCP Clients to the GCP instance
 
-#### func (*GCP) WithServices
+#### func (*GCP) ImageAnnotator
 
 ```go
-func (g *GCP) WithServices() []error
+func (g *GCP) ImageAnnotator(ctx context.Context) (*vision.ImageAnnotatorClient, error)
 ```
-WithServices adds the GCP Services to the GCP instance
 
-#### type Services
+#### func (*GCP) ImageProductSearch
 
 ```go
-type Services struct {
-	Container    *container.Service
-	HealthCare   *healthcare.Service
-	Calendar     *calendar.Service
-	Blogger      *blogger.Service
-	CustomSearch *customsearch.Service
-	ClassRoom    *class.Service
-	Content      *content.APIService
-	OSLogin      *oslogin.Service
-	People       *people.Service
-	Photos       *photos.Service
-	Predicion    *prediction.Service
-	Redis        *redis.Service
-	Config       *run.Service
-	Sheets       *sheets.Service
-	Slides       *slides.Service
-	Tasks        *tasks.Service
-	YoutTube     *youtube.Service
-	Docs         *docs.Service
-	Jobs         *jobs.Service
-	Domains      *plusdomains.Service
-}
+func (g *GCP) ImageProductSearch(ctx context.Context) (*vision.ProductSearchClient, error)
 ```
 
-GCP ServiceSet. Make sure to pass the necessary scopes in your config to
-successfully initialize services.
+#### func (*GCP) Init
+
+```go
+func (g *GCP) Init() error
+```
+
+#### func (*GCP) Jobs
+
+```go
+func (g *GCP) Jobs(ctx context.Context) (*jobs.Service, error)
+```
+
+#### func (*GCP) KMS
+
+```go
+func (g *GCP) KMS(ctx context.Context) (*kms.KeyManagementClient, error)
+```
+
+#### func (*GCP) Kube
+
+```go
+func (g *GCP) Kube(inCluster bool) (*kubernetes.Clientset, error)
+```
+
+#### func (*GCP) Language
+
+```go
+func (g *GCP) Language(ctx context.Context) (*language.Client, error)
+```
+
+#### func (*GCP) OSLogin
+
+```go
+func (g *GCP) OSLogin(ctx context.Context) (*oslogin.Service, error)
+```
+
+#### func (*GCP) People
+
+```go
+func (g *GCP) People(ctx context.Context) (*people.Service, error)
+```
+
+#### func (*GCP) Photos
+
+```go
+func (g *GCP) Photos(cli *http.Client) (*photos.Service, error)
+```
+
+#### func (*GCP) Prediction
+
+```go
+func (g *GCP) Prediction(cli *http.Client) (*prediction.Service, error)
+```
+
+#### func (*GCP) PubSub
+
+```go
+func (g *GCP) PubSub(ctx context.Context) (*pubsub.Client, error)
+```
+
+#### func (*GCP) Redis
+
+```go
+func (g *GCP) Redis(ctx context.Context) (*redis.Service, error)
+```
+
+#### func (*GCP) RuntimeGCP
+
+```go
+func (g *GCP) RuntimeGCP(ctx context.Context) (*run.Service, error)
+```
+
+#### func (*GCP) Sheets
+
+```go
+func (g *GCP) Sheets(ctx context.Context) (*sheets.Service, error)
+```
+
+#### func (*GCP) Slides
+
+```go
+func (g *GCP) Slides(ctx context.Context) (*slides.Service, error)
+```
+
+#### func (*GCP) Spanner
+
+```go
+func (g *GCP) Spanner(ctx context.Context, database string) (*spanner.Client, error)
+```
+
+#### func (*GCP) Speech
+
+```go
+func (g *GCP) Speech(ctx context.Context) (*speech.Client, error)
+```
+
+#### func (*GCP) Storage
+
+```go
+func (g *GCP) Storage(ctx context.Context) (*storage.Client, error)
+```
+
+#### func (*GCP) Tasks
+
+```go
+func (g *GCP) Tasks(ctx context.Context) (*tasks.Service, error)
+```
+
+#### func (*GCP) Text2Speech
+
+```go
+func (g *GCP) Text2Speech(ctx context.Context) (*texttospeech.Client, error)
+```
+
+#### func (*GCP) Translate
+
+```go
+func (g *GCP) Translate(ctx context.Context) (*translate.Client, error)
+```
+
+#### func (*GCP) VideoIntelligence
+
+```go
+func (g *GCP) VideoIntelligence(ctx context.Context) (*videointelligence.Client, error)
+```
+
+#### func (*GCP) YoutTube
+
+```go
+func (g *GCP) YoutTube(ctx context.Context) (*youtube.Service, error)
+```

@@ -17,10 +17,8 @@ import (
 	"context"
 	"github.com/autom8ter/gcloud/clients"
 	"github.com/autom8ter/objectify"
-	"github.com/hashicorp/go-multierror"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/blogger/v3"
-	"google.golang.org/api/calendar/v3"
 	class "google.golang.org/api/classroom/v1"
 	"google.golang.org/api/container/v1"
 	"google.golang.org/api/content/v2.1"
@@ -47,330 +45,165 @@ import (
 
 var tool = objectify.New()
 
-// Config is used to create a new GCP instance
-type Config struct {
-	Project   string   `validate:"required"`
-	Scopes    []string `validate:"required"`
-	InCluster bool
-	SpannerDB string
-	Options   []option.ClientOption `validate:"required"`
-}
-
-// GCP ServiceSet. Make sure to pass the necessary scopes in your config to successfully initialize services.
-type Services struct {
-	Container    *container.Service
-	HealthCare   *healthcare.Service
-	Calendar     *calendar.Service
-	Blogger      *blogger.Service
-	CustomSearch *customsearch.Service
-	ClassRoom    *class.Service
-	Content      *content.APIService
-	OSLogin      *oslogin.Service
-	People       *people.Service
-	Photos       *photos.Service
-	Prediction   *prediction.Service
-	Redis        *redis.Service
-	Config       *run.Service
-	Sheets       *sheets.Service
-	Slides       *slides.Service
-	Tasks        *tasks.Service
-	YoutTube     *youtube.Service
-	Docs         *docs.Service
-	Jobs         *jobs.Service
-	Domains      *plusdomains.Service
-}
-
-// GCP ClientSet
-type Clients struct {
-	PubSub             *pubsub.Client `validate:"required"`
-	IAM                *iam.Service
-	Storage            *storage.Client `validate:"required"`
-	Spanner            *spanner.Client
-	DBAdmin            *database.DatabaseAdminClient
-	FireStore          *firestore.Client `validate:"required"`
-	IOT                *iot.DeviceManagerClient
-	Kube               *kubernetes.Clientset `validate:"required"`
-	Keys               *kms.KeyManagementClient
-	ImageAnnotator     *vision.ImageAnnotatorClient
-	ImageProductSearch *vision.ProductSearchClient
-	VideoIntelligence  *videointelligence.Client
-	Speech             *speech.Client
-	Text2Speech        *texttospeech.Client
-	Translate          *translate.Client
-	Language           *language.Client
-}
-
-// GCP holds Google Cloud Platform Clients and Services
+// GCP is the configuration used to return gcp clients and services. Use Init() to validate GCP before using it.
 type GCP struct {
-	ctx     context.Context `validate:"required"`
-	cfg     *Config         `validate:"required"`
-	httP    *http.Client    `validate:"required"`
-	clients *Clients        `validate:"required"`
-	svcs    *Services       `validate:"required"`
-	err     *multierror.Error
+	Project string                `validate:"required"`
+	Scopes  []string              `validate:"required"`
+	Options []option.ClientOption `validate:"required"`
 }
 
-// New returns a new authenticated GCP instance from the provided context and config
-func New(ctx context.Context, cfg *Config) *GCP {
-	var errs []error
-	if ctx == nil {
-		ctx = context.Background()
-	}
-	err := tool.Validate(cfg)
-	if err != nil {
-		panic("validation error: " + err.Error())
-	}
-	cli, err := google.DefaultClient(ctx, cfg.Scopes...)
-	if err != nil {
-		errs = append(errs, err)
-	}
-
-	sub, err := pubsub.NewClient(ctx, cfg.Project, cfg.Options...)
-	if err != nil {
-		errs = append(errs, err)
-	}
-	pol, err := iam.NewService(ctx, cfg.Options...)
-	if err != nil {
-		errs = append(errs, err)
-	}
-	strg, err := storage.NewClient(ctx, cfg.Options...)
-	if err != nil {
-		errs = append(errs, err)
-	}
-	span, err := spanner.NewClient(ctx, cfg.SpannerDB, cfg.Options...)
-	if err != nil {
-		errs = append(errs, err)
-	}
-	db, err := database.NewDatabaseAdminClient(ctx, cfg.Options...)
-	if err != nil {
-		errs = append(errs, err)
-	}
-	fire, err := firestore.NewClient(ctx, cfg.Project, cfg.Options...)
-	if err != nil {
-		errs = append(errs, err)
-	}
-	bots, err := iot.NewDeviceManagerClient(ctx, cfg.Options...)
-	if err != nil {
-		errs = append(errs, err)
-	}
-	kub, err := clients.NewKubernetesClientSet(cfg.InCluster)
-	if err != nil {
-		errs = append(errs, err)
-	}
-	kys, err := kms.NewKeyManagementClient(ctx, cfg.Options...)
-	if err != nil {
-		errs = append(errs, err)
-	}
-	ann, err := vision.NewImageAnnotatorClient(ctx, cfg.Options...)
-	if err != nil {
-		errs = append(errs, err)
-	}
-	prodsch, err := vision.NewProductSearchClient(ctx, cfg.Options...)
-	if err != nil {
-		errs = append(errs, err)
-	}
-	intel, err := videointelligence.NewClient(ctx, cfg.Options...)
-	if err != nil {
-		errs = append(errs, err)
-	}
-	t2p, err := texttospeech.NewClient(ctx, cfg.Options...)
-	if err != nil {
-		errs = append(errs, err)
-	}
-	spch, err := speech.NewClient(ctx, cfg.Options...)
-	if err != nil {
-		errs = append(errs, err)
-	}
-	trans, err := translate.NewClient(ctx, cfg.Options...)
-	if err != nil {
-		errs = append(errs, err)
-	}
-	lang, err := language.NewClient(ctx, cfg.Options...)
-	if err != nil {
-		errs = append(errs, err)
-	}
-
-	tain, err := container.NewService(ctx, cfg.Options...)
-	if err != nil {
-		errs = append(errs, err)
-	}
-	hcare, err := healthcare.NewService(ctx, cfg.Options...)
-	if err != nil {
-		errs = append(errs, err)
-	}
-	cal, err := calendar.NewService(ctx, cfg.Options...)
-	if err != nil {
-		errs = append(errs, err)
-	}
-	blg, err := blogger.NewService(ctx, cfg.Options...)
-	if err != nil {
-		errs = append(errs, err)
-	}
-	sch, err := customsearch.NewService(ctx, cfg.Options...)
-	if err != nil {
-		errs = append(errs, err)
-	}
-	cRoom, err := class.NewService(ctx, cfg.Options...)
-	if err != nil {
-		errs = append(errs, err)
-	}
-	cont, err := content.NewService(ctx, cfg.Options...)
-	if err != nil {
-		errs = append(errs, err)
-	}
-	login, err := oslogin.NewService(ctx, cfg.Options...)
-	if err != nil {
-		errs = append(errs, err)
-	}
-	peeps, err := people.NewService(ctx, cfg.Options...)
-	if err != nil {
-		errs = append(errs, err)
-	}
-	phot, err := photos.New(cli)
-	if err != nil {
-		errs = append(errs, err)
-	}
-	pred, err := prediction.New(cli)
-	if err != nil {
-		errs = append(errs, err)
-	}
-	red, err := redis.NewService(ctx, cfg.Options...)
-	if err != nil {
-		errs = append(errs, err)
-	}
-	runtime, err := run.NewService(ctx, cfg.Options...)
-	if err != nil {
-		errs = append(errs, err)
-	}
-	shts, err := sheets.NewService(ctx, cfg.Options...)
-	if err != nil {
-		errs = append(errs, err)
-	}
-	slds, err := slides.NewService(ctx, cfg.Options...)
-	if err != nil {
-		errs = append(errs, err)
-	}
-	tsks, err := tasks.NewService(ctx, cfg.Options...)
-	if err != nil {
-		errs = append(errs, err)
-	}
-	tube, err := youtube.NewService(ctx, cfg.Options...)
-	if err != nil {
-		errs = append(errs, err)
-	}
-	dcs, err := docs.NewService(ctx, cfg.Options...)
-	if err != nil {
-		errs = append(errs, err)
-	}
-	jbs, err := jobs.NewService(ctx, cfg.Options...)
-	if err != nil {
-		errs = append(errs, err)
-	}
-	doms, err := plusdomains.NewService(ctx, cfg.Options...)
-	if err != nil {
-		errs = append(errs, err)
-	}
-	multiErr := appendErr(errs[0], errs[1:]...)
-	g := &GCP{
-		ctx:  ctx,
-		cfg:  cfg,
-		httP: cli,
-		err:  multiErr,
-		svcs: &Services{
-			Container:    tain,
-			HealthCare:   hcare,
-			Calendar:     cal,
-			Blogger:      blg,
-			CustomSearch: sch,
-			ClassRoom:    cRoom,
-			Content:      cont,
-			OSLogin:      login,
-			People:       peeps,
-			Photos:       phot,
-			Prediction:   pred,
-			Redis:        red,
-			Config:       runtime,
-			Sheets:       shts,
-			Slides:       slds,
-			Tasks:        tsks,
-			YoutTube:     tube,
-			Docs:         dcs,
-			Jobs:         jbs,
-			Domains:      doms,
-		},
-		clients: &Clients{
-			PubSub:             sub,
-			IAM:                pol,
-			Storage:            strg,
-			Spanner:            span,
-			DBAdmin:            db,
-			FireStore:          fire,
-			IOT:                bots,
-			Kube:               kub,
-			Keys:               kys,
-			ImageAnnotator:     ann,
-			ImageProductSearch: prodsch,
-			VideoIntelligence:  intel,
-			Speech:             spch,
-			Text2Speech:        t2p,
-			Translate:          trans,
-			Language:           lang,
-		},
-	}
-	err = tool.Validate(g)
-	if err != nil {
-		panic("validation error: " + err.Error())
-	}
-	return g
+func NewGCP(project string, scopes []string, options ...option.ClientOption) *GCP {
+	return &GCP{Project: project, Scopes: scopes, Options: options}
 }
 
-// Close closes all clients
-func (g *GCP) Close() {
-	_ = g.clients.PubSub.Close()
-	_ = g.clients.Storage.Close()
-	_ = g.clients.DBAdmin.Close()
-	_ = g.clients.Speech.Close()
-	_ = g.clients.FireStore.Close()
-	_ = g.clients.Text2Speech.Close()
-	_ = g.clients.ImageProductSearch.Close()
-	_ = g.clients.Translate.Close()
-	_ = g.clients.Keys.Close()
-	_ = g.clients.VideoIntelligence.Close()
+func (g *GCP) Init() error {
+	return tool.Validate(g)
 }
 
-// FromContext returns the value the context is holding from the given key
-func (g *GCP) FromContext(key interface{}) interface{} {
-	return g.ctx.Value(key)
+func (g *GCP) HTTP(ctx context.Context) (*http.Client, error) {
+	return google.DefaultClient(ctx, g.Scopes...)
 }
 
-func (g *GCP) Context() context.Context {
-	return g.ctx
+func (g *GCP) PubSub(ctx context.Context) (*pubsub.Client, error) {
+	return pubsub.NewClient(ctx, g.Project, g.Options...)
 }
 
-func (g *GCP) Error() error {
-	return g.err.ErrorOrNil()
+func (g *GCP) Firestore(ctx context.Context) (*firestore.Client, error) {
+	return firestore.NewClient(ctx, g.Project, g.Options...)
 }
 
-// Configuration returns the config used to create the GCP instance
-func (g *GCP) Configuration() *Config {
-	return g.cfg
+func (g *GCP) Translate(ctx context.Context) (*translate.Client, error) {
+	return translate.NewClient(ctx, g.Options...)
 }
 
-// Services returns an authenticated GCP ServiceSet
-func (g *GCP) Services() *Services {
-	return g.svcs
+func (g *GCP) IAM(ctx context.Context) (*iam.Service, error) {
+	return iam.NewService(ctx, g.Options...)
 }
 
-// Clients returns an authenticated GCP ClientSet
-func (g *GCP) Clients() *Clients {
-	return g.clients
+func (g *GCP) Storage(ctx context.Context) (*storage.Client, error) {
+	return storage.NewClient(ctx, g.Options...)
 }
 
-// HTTP returns a google default HTTP client
-func (g *GCP) HTTP() *http.Client {
-	return g.httP
+func (g *GCP) IOT(ctx context.Context) (*iot.DeviceManagerClient, error) {
+	return iot.NewDeviceManagerClient(ctx, g.Options...)
 }
 
-func appendErr(base error, toAppend ...error) *multierror.Error {
-	return multierror.Append(base, toAppend...)
+func (g *GCP) Kube(inCluster bool) (*kubernetes.Clientset, error) {
+	return clients.NewKubernetesClientSet(inCluster)
+}
+
+func (g *GCP) Language(ctx context.Context) (*language.Client, error) {
+	return language.NewClient(ctx, g.Options...)
+}
+
+func (g *GCP) Spanner(ctx context.Context, database string) (*spanner.Client, error) {
+	return spanner.NewClient(ctx, database, g.Options...)
+}
+
+func (g *GCP) DBAdmin(ctx context.Context) (*database.DatabaseAdminClient, error) {
+	return database.NewDatabaseAdminClient(ctx, g.Options...)
+}
+
+func (g *GCP) KMS(ctx context.Context) (*kms.KeyManagementClient, error) {
+	return kms.NewKeyManagementClient(ctx, g.Options...)
+}
+
+func (g *GCP) VideoIntelligence(ctx context.Context) (*videointelligence.Client, error) {
+	return videointelligence.NewClient(ctx, g.Options...)
+}
+
+func (g *GCP) ImageAnnotator(ctx context.Context) (*vision.ImageAnnotatorClient, error) {
+	return vision.NewImageAnnotatorClient(ctx, g.Options...)
+}
+
+func (g *GCP) ImageProductSearch(ctx context.Context) (*vision.ProductSearchClient, error) {
+	return vision.NewProductSearchClient(ctx, g.Options...)
+}
+
+func (g *GCP) Text2Speech(ctx context.Context) (*texttospeech.Client, error) {
+	return texttospeech.NewClient(ctx, g.Options...)
+}
+
+func (g *GCP) Speech(ctx context.Context) (*speech.Client, error) {
+	return speech.NewClient(ctx, g.Options...)
+}
+
+func (g *GCP) Container(ctx context.Context) (*container.Service, error) {
+	return container.NewService(ctx, g.Options...)
+}
+
+func (g *GCP) HealthCare(ctx context.Context) (*healthcare.Service, error) {
+	return healthcare.NewService(ctx, g.Options...)
+}
+
+func (g *GCP) Calendar(ctx context.Context) (*healthcare.Service, error) {
+	return healthcare.NewService(ctx, g.Options...)
+}
+
+func (g *GCP) Blogger(ctx context.Context) (*blogger.Service, error) {
+	return blogger.NewService(ctx, g.Options...)
+}
+
+func (g *GCP) CustomSearch(ctx context.Context) (*customsearch.Service, error) {
+	return customsearch.NewService(ctx, g.Options...)
+}
+
+func (g *GCP) ClassRoom(ctx context.Context) (*class.Service, error) {
+	return class.NewService(ctx, g.Options...)
+}
+
+func (g *GCP) Content(ctx context.Context) (*content.APIService, error) {
+	return content.NewService(ctx, g.Options...)
+}
+
+func (g *GCP) OSLogin(ctx context.Context) (*oslogin.Service, error) {
+	return oslogin.NewService(ctx, g.Options...)
+}
+
+func (g *GCP) People(ctx context.Context) (*people.Service, error) {
+	return people.NewService(ctx, g.Options...)
+}
+
+func (g *GCP) Photos(cli *http.Client) (*photos.Service, error) {
+	return photos.New(cli)
+}
+
+func (g *GCP) Prediction(cli *http.Client) (*prediction.Service, error) {
+	return prediction.New(cli)
+}
+
+func (g *GCP) Redis(ctx context.Context) (*redis.Service, error) {
+	return redis.NewService(ctx, g.Options...)
+}
+
+func (g *GCP) RuntimeGCP(ctx context.Context) (*run.Service, error) {
+	return run.NewService(ctx, g.Options...)
+}
+
+func (g *GCP) Sheets(ctx context.Context) (*sheets.Service, error) {
+	return sheets.NewService(ctx, g.Options...)
+}
+
+func (g *GCP) Slides(ctx context.Context) (*slides.Service, error) {
+	return slides.NewService(ctx, g.Options...)
+}
+
+func (g *GCP) Tasks(ctx context.Context) (*tasks.Service, error) {
+	return tasks.NewService(ctx, g.Options...)
+}
+
+func (g *GCP) YoutTube(ctx context.Context) (*youtube.Service, error) {
+	return youtube.NewService(ctx, g.Options...)
+}
+
+func (g *GCP) Docs(ctx context.Context) (*docs.Service, error) {
+	return docs.NewService(ctx, g.Options...)
+}
+
+func (g *GCP) Jobs(ctx context.Context) (*jobs.Service, error) {
+	return jobs.NewService(ctx, g.Options...)
+}
+
+func (g *GCP) Domains(ctx context.Context) (*plusdomains.Service, error) {
+	return plusdomains.NewService(ctx, g.Options...)
 }
