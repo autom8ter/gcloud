@@ -3,13 +3,13 @@ module github.com/autom8ter/gcloud
 require (
 	cloud.google.com/go v0.37.2
 	contrib.go.opencensus.io/exporter/stackdriver v0.10.0 // indirect
-	github.com/autom8ter/objectify v0.0.0-20190407102447-e8d21d988edc
+	github.com/autom8ter/objectify v0.0.0-20190408071719-79ea764cf5ba
 	github.com/google/gofuzz v0.0.0-20170612174753-24818f796faf // indirect
 	github.com/googleapis/gnostic v0.2.0 // indirect
-	github.com/hashicorp/go-multierror v1.0.0
 	github.com/json-iterator/go v1.1.6 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.1 // indirect
+	github.com/pkg/errors v0.8.1
 	github.com/stretchr/testify v1.3.0 // indirect
 	golang.org/x/net v0.0.0-20190324223953-e3b2ff56ed87 // indirect
 	golang.org/x/oauth2 v0.0.0-20190319182350-c85d3e98c914
